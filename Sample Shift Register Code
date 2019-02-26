@@ -1,36 +1,62 @@
-/*
-  Shift Register Example
- for 74HC595 shift register
+//This code is written for the Arduino IDE
+//The purpose of this code is to take a user defined polar coordinate and reconfigure an array to match those coordinates
 
- This sketch turns reads serial input and uses it to set the pins
- of a 74HC595 shift register.
+//Variables
+int latchPin = 1;
+int dataPin = 1;
 
- Hardware:
- * 74HC595 shift register attached to pins 8, 12, and 11 of the Arduino,
- as detailed below.
- * LEDs attached to each of the outputs of the shift register.
-
-
- Created 22 May 2009
- Created 23 Mar 2010
- by Tom Igoe
-
- */
-
-//Pin connected to latch pin (ST_CP) of 74HC595
-const int latchPin = 8;
-//Pin connected to clock pin (SH_CP) of 74HC595
-const int clockPin = 12;
-////Pin connected to Data in (DS) of 74HC595
-const int dataPin = 11;
+//Set Pins
+const int Ring1RadialLimitSwitch = 2;
+const int Ring1AxialLimitSwitch = 3;
+const int PWM = 4;
+const int Ring1MotorLatchPin = 6;
+const int Ring1MotorDataPin = 7;
+const int Ring1RadialEncoderChannelA = 8;
+const int Ring1RadialEncoderChannelB = 9;
+const int Ring1RadialEncoderIndex = 10;
+const int Ring1AxialEncoderChannelA = 11;
+const int Ring1AxialEncoderChannelB = 12;
+const int Ring1AxialEncoderIndex = 13;
+const int Ring1Brake = 15;
+const int Ring2RadialLimitSwitch = 20;
+const int Ring2AxialLimitSwitch = 21;
+const int Ring2MotorLatchPin = 24;
+const int Ring2MotorDataPin = 25;
+const int Ring2RadialEncoderChannelA = 26;
+const int Ring2RadialEncoderChannelB = 27;
+const int Ring2RadialEncoderIndex = 28;
+const int Ring2AxialEncoderChannelA = 29;
+const int Ring2AxialEncoderChannelB = 30;
+const int Ring2AxialEncoderIndex = 31;
+const int Ring2Brake = 33;
 
 void setup() {
-  //set pins to output because they are addressed in the main loop
-  pinMode(latchPin, OUTPUT);
-  pinMode(dataPin, OUTPUT);  
-  pinMode(clockPin, OUTPUT);
-  Serial.begin(9600);
-  Serial.println("reset");
+//configure pins
+pinMode(Ring1RadialLimitSwitch, INPUT);
+pinMode(Ring1AxialLimitSwitch, INPUT);
+pinMode(PWM, OUTPUT);
+pinMode(Ring1MotorLatchPin, OUTPUT);
+pinMode(Ring1MotorDataPin, OUTPUT);
+pinMode(Ring1RadialEncoderChannelA, INPUT);
+pinMode(Ring1RadialEncoderChannelB, INPUT);
+pinMode(Ring1RadialEncoderIndex, INPUT);
+pinMode(Ring1AxialEncoderChannelA, INPUT);
+pinMode(Ring1AxialEncoderChannelB, INPUT);
+pinMode(Ring1AxialEncoderIndex, INPUT);
+pinMode(Ring1Brake, INPUT);
+pinMode(Ring2RadialLimitSwitch, INPUT);
+pinMode(Ring2AxialLimitSwitch, INPUT);
+pinMode(Ring2MotorLatchPin, OUTPUT);
+pinMode(Ring2MotorDataPin, OUTPUT);
+pinMode(Ring2RadialEncoderChannelA, INPUT);
+pinMode(Ring2RadialEncoderChannelB, INPUT);
+pinMode(Ring2RadialEncoderIndex, INPUT);
+pinMode(Ring2AxialEncoderChannelA, INPUT);
+pinMode(Ring2AxialEncoderChannelB, INPUT);
+pinMode(Ring2AxialEncoderIndex, INPUT);
+pinMode(Ring2Brake, INPUT);
+Serial.begin(9600);
+Serial.println("reset");
 }
 
 void loop() {
@@ -42,16 +68,24 @@ void loop() {
     int bitToSet = Serial.read() - 48;
 
   // write to the shift register with the correct bit set high:
-    registerWrite(bitToSet, HIGH);
+    registerWrite(bitToSet, HIGH, 1);
+    registerWrite(bitToSet, HIGH, 2);
   }
 }
 
-// This method sends bits to the shift register:
+// This method sends bits to the shift register for running the stepper motor
 
-void registerWrite(int whichPin, int whichState) {
+void registerWrite(int whichPin, int whichState, int whichRing) {
 // the bits you want to send
   byte bitsToSend = 0;
-
+if (whichRing == 1){
+  latchPin = Ring1MotorLatchPin;
+  dataPin = Ring1MotorDataPin;
+}
+else if (whichRing == 2){
+  latchPin = Ring2MotorLatchPin;
+  dataPin = Ring2MotorDataPin;
+}
   // turn off the output so the pins don't light up
   // while you're shifting bits:
   digitalWrite(latchPin, LOW);
@@ -60,9 +94,13 @@ void registerWrite(int whichPin, int whichState) {
   bitWrite(bitsToSend, whichPin, whichState);
 
   // shift the bits out:
-  shiftOut(dataPin, clockPin, MSBFIRST, bitsToSend);
+  shiftOut(dataPin, PWM, MSBFIRST, bitsToSend);
 
     // turn on the output so the LEDs can light up:
   digitalWrite(latchPin, HIGH);
+
+}
+
+void StepperMotor (){
 
 }
