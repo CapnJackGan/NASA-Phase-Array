@@ -8,10 +8,14 @@ int Ring1RadialEncoder = 1; //counter to keep track of encoder position
 int Ring1AxialEncoder = 1;
 int Ring2RadialEncoder = 1;
 int Ring2AxialEncoder = 1;
-char Ring1RadialState = 'A'; //Motor step states
-char Ring1AxialState = 'A';
-char Ring2RadialState = 'A';
-char Ring2AxialState = 'A';
+char Ring1RadialEncoderState = 'A'; //Encoder states
+char Ring1AxialEncoderState = 'A';
+char Ring2RadialEncoderState = 'A';
+char Ring2AxialEncoderState = 'A';
+char Ring1RadialMotorState = 'A'; //Motor step states
+char Ring1AxialMotorState = 'A';
+char Ring2RadialMotorState = 'A';
+char Ring2AxialMotorState = 'A';
 
 //Set Pins, see pinout chart
 const int Ring1RadialLimitSwitch = 2;
@@ -66,19 +70,21 @@ pinMode(Ring2Brake, OUTPUT);
 Serial.begin(9600);
 Serial.println("reset");
 //initiate encoder interupts
-attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelA), Ring1RadialEncoderA, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelB), Ring1RadialEncoderB, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelA), Ring1AxialEncoderA, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelB), Ring1AxialEncoderB, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelA), Ring2RadialEncoderA, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelB), Ring2RadialEncoderB, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelA), Ring2AxialEncoderA, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelB), Ring2AxialEncoderB, CHANGE);
+attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelA), Ring1RadialEncoderAInterrupt, CHANGE);
+attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelB), Ring1RadialEncoderBInterrupt, CHANGE);
+attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelA), Ring1AxialEncoderAInterrupt, CHANGE);
+attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelB), Ring1AxialEncoderBInterrupt, CHANGE);
+attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelA), Ring2RadialEncoderAInterrupt, CHANGE);
+attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelB), Ring2RadialEncoderBInterrupt, CHANGE);
+attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelA), Ring2AxialEncoderAInterrupt, CHANGE);
+attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelB), Ring2AxialEncoderBInterrupt, CHANGE);
 }
 
 //encoder interupt
-void Ring1RadialEncoderA(){
+void Ring1RadialEncoderAInterrupt(){
   //implement state machine and copy paste x7
+  int A = digitalRead(Ring1RadialEncoderChannelA);  
+  int B = digitalRead(Ring1RadialEncoderChannelB);  
 }
 
 // This function sends bits to the shift register for running the stepper motor
