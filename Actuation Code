@@ -4,8 +4,12 @@
 //Variables
 int latchPin = 1;
 int dataPin = 1;
+int Ring1RadialEncoder = 1; //counter to keep track of encoder position
+int Ring1AxialEncoder = 1;
+int Ring2RadialEncoder = 1;
+int Ring2AxialEncoder = 1;
 
-//Set Pins
+//Set Pins, see pinout chart
 const int Ring1RadialLimitSwitch = 2;
 const int Ring1AxialLimitSwitch = 3;
 const int PWM = 4;
@@ -31,7 +35,7 @@ const int Ring2AxialEncoderIndex = 31;
 const int Ring2Brake = 33;
 
 void setup() {
-//configure pins
+//configure pins to input or output
 pinMode(Ring1RadialLimitSwitch, INPUT);
 pinMode(Ring1AxialLimitSwitch, INPUT);
 pinMode(PWM, OUTPUT);
@@ -59,22 +63,7 @@ Serial.begin(9600);
 Serial.println("reset");
 }
 
-void loop() {
-  if (Serial.available() > 0) {
-    // ASCII '0' through '9' characters are
-    // represented by the values 48 through 57.
-    // so if the user types a number from 0 through 9 in ASCII, 
-    // you can subtract 48 to get the actual value:
-    int bitToSet = Serial.read() - 48;
-
-  // write to the shift register with the correct bit set high:
-    registerWrite(bitToSet, HIGH, 1);
-    registerWrite(bitToSet, HIGH, 2);
-  }
-}
-
-// This method sends bits to the shift register for running the stepper motor
-
+// This function sends bits to the shift register for running the stepper motor
 void registerWrite(int whichPin, int whichState, int whichRing) {
 // the bits you want to send
   byte bitsToSend = 0;
@@ -86,8 +75,7 @@ else if (whichRing == 2){
   latchPin = Ring2MotorLatchPin;
   dataPin = Ring2MotorDataPin;
 }
-  // turn off the output so the pins don't light up
-  // while you're shifting bits:
+  // turn off the output so the pins don't go high while shifting bits
   digitalWrite(latchPin, LOW);
 
   // turn on the next highest bit in bitsToSend:
@@ -98,9 +86,58 @@ else if (whichRing == 2){
 
     // turn on the output so the LEDs can light up:
   digitalWrite(latchPin, HIGH);
-
 }
 
+//This function runs the motor
 void StepperMotor (){
 
 }
+
+//StartUp function, this zeros the array and encoders
+void StartUp (){
+  while( Ring1RadialEncoder && Ring1AxialEncoder && Ring1RadialEncoder && Ring1AxialEncoder != 0){
+  digitalRead(Ring1RadialLimitSwitch);
+  if (Ring1RadialLimitSwitch == LOW) {
+    StepperMotor ();
+  }
+  else{
+    Ring1RadialEncoder=0;
+  }
+  digitalRead(Ring1AxialLimitSwitch);
+  if (Ring1AxialLimitSwitch == LOW) {
+    StepperMotor ();
+  }
+  else{
+    Ring1AxialEncoder=0;
+  }
+  digitalRead(Ring2RadialLimitSwitch);
+  if (Ring2RadialLimitSwitch == LOW) {
+    StepperMotor ();
+  }
+  else{
+    Ring2RadialEncoder=0;
+  }
+  digitalRead(Ring2AxialLimitSwitch);
+  if (Ring2AxialLimitSwitch == LOW) {
+    StepperMotor ();
+  }
+  else{
+    Ring2AxialEncoder=0;
+  }
+}
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+  // ASCII '0' through '9' characters are represented by the values 48 through 57
+  // so if the user types a number from 0 through 9 in ASCII, you can subtract 48 to get the actual value:
+    int bitToSet = Serial.read() - 48;
+
+  // write to the shift register with the correct bit set high:
+    registerWrite(bitToSet, HIGH, 1);
+    registerWrite(bitToSet, HIGH, 2);
+  }
+  StartUp();
+}
+
+
