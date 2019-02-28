@@ -4,10 +4,10 @@
 //Variables
 int latchPin = 1;
 int dataPin = 1;
-int Ring1RadialEncoder = 1; //counter to keep track of encoder position
-int Ring1AxialEncoder = 1;
-int Ring2RadialEncoder = 1;
-int Ring2AxialEncoder = 1;
+int Ring1RadialEncoderCounter = 1; //counter to keep track of encoder position
+int Ring1AxialEncoderCounter = 1;
+int Ring2RadialEncoderCounter = 1;
+int Ring2AxialEncoderCounter = 1;
 char Ring1RadialEncoderState = 'A'; //Encoder states
 char Ring1AxialEncoderState = 'A';
 char Ring2RadialEncoderState = 'A';
@@ -80,11 +80,97 @@ attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelA), Ring2AxialEnco
 attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelB), Ring2AxialEncoderBInterrupt, CHANGE);
 }
 
-//encoder interupt
+//Encoder interupts
 void Ring1RadialEncoderAInterrupt(){
-  //implement state machine and copy paste x7
-  int A = digitalRead(Ring1RadialEncoderChannelA);  
-  int B = digitalRead(Ring1RadialEncoderChannelB);  
+EncoderInterupt(char Ring1RadialEncoderState, int Ring1RadialEncoderChannelA, int Ring1RadialEncoderChannelB, int Ring1RadialEncoderCounter);
+}
+
+void Ring1RadialEncoderBInterrupt(){
+EncoderInterupt(char Ring1RadialEncoderState, int Ring1RadialEncoderChannelA, int Ring1RadialEncoderChannelB, int Ring1RadialEncoderCounter);
+}
+
+void Ring1AxialEncoderAInterrupt(){
+EncoderInterupt(char Ring1AxialEncoderState, int Ring1AxialEncoderChannelA, int Ring1AxialEncoderChannelB, int Ring1AxialEncoderCounter);
+}
+
+void Ring1AxialEncoderBInterrupt(){
+EncoderInterupt(char Ring1AxialEncoderState, int Ring1AxialEncoderChannelA, int Ring1AxialEncoderChannelB, int Ring1AxialEncoderCounter);
+}
+//Ring 2 interupts
+void Ring2RadialEncoderAInterrupt(){
+EncoderInterupt(char Ring2RadialEncoderState, int Ring2RadialEncoderChannelA, int Ring2RadialEncoderChannelB, int Ring2RadialEncoderCounter);
+}
+
+void Ring2RadialEncoderBInterrupt(){
+EncoderInterupt(char Ring2RadialEncoderState, int Ring2RadialEncoderChannelA, int Ring2RadialEncoderChannelB, int Ring2RadialEncoderCounter);
+}
+
+void Ring2AxialEncoderAInterrupt(){
+EncoderInterupt(char Ring2AxialEncoderState, int Ring2AxialEncoderChannelA, int Ring2AxialEncoderChannelB, int Ring2AxialEncoderCounter);
+}
+
+void Ring2AxialEncoderBInterrupt(){
+EncoderInterupt(char Ring2AxialEncoderState, int Ring2AxialEncoderChannelA, int Ring2AxialEncoderChannelB, int Ring2AxialEncoderCounter);
+}
+
+//Encoder interupt function
+void EncoderInterupt(char EncoderState, int ChannelA, int ChannelB, int EncoderCounter){
+  char PreviousState = EncoderState;
+  int A = digitalRead(ChannelA);  
+  int B = digitalRead(ChannelB);  
+ //Find encoder state
+  if (A == HIGH && B == HIGH){
+    {
+    EnState = 'A';
+    }
+  else if (A == HIGH && B == LOW){
+    EnState = 'B';
+    }
+  else if (A == LOW && B == HIGH){
+    EnState = 'C';
+    }  
+  else {
+    EnState = 'D' 
+  }
+//Finds encoder direction using encoder states
+int Direction;
+  if (Previous == 'A'){
+    if (State == 'B'){
+      Direction = 1;
+    }
+    else if (State == 'C'){
+      Direction = -1;
+    }
+  }
+  if (Previous == 'B'){
+    if (State == 'D'){
+      Direction = 1;
+    }
+    else if (State == 'A'){
+      Direction = -1;
+    }
+  }
+  if (Previous == 'C'){
+    if (State == 'A'){
+      Direction = 1;
+    }
+    else if (State == 'D')
+      Direction = -1;
+    }
+  }
+  if (Previous == 'D'){
+    if (State == 'C'){
+      Direction = 1;
+    }
+    else if (State == 'B'){
+      Direction = -1;
+    }
+  if (Direction > 0){
+    EncoderCounter++;
+  }
+  else{
+    EncoderCounter--;
+  }
 }
 
 // This function sends bits to the shift register for running the stepper motor
@@ -133,28 +219,28 @@ void StartUp (){
     StepperMotor (1);
   }
   else{
-    Ring1RadialEncoder=0;
+    Ring1RadialEncoderCounter=0;
   }
   digitalRead(Ring1AxialLimitSwitch);
   if (Ring1AxialLimitSwitch == LOW) {
     StepperMotor (1);
   }
   else{
-    Ring1AxialEncoder=0;
+    Ring1AxialEncoderCounter=0;
   }
   digitalRead(Ring2RadialLimitSwitch);
   if (Ring2RadialLimitSwitch == LOW) {
     StepperMotor (1);
   }
   else{
-    Ring2RadialEncoder=0;
+    Ring2RadialEncoderCounter=0;
   }
   digitalRead(Ring2AxialLimitSwitch);
   if (Ring2AxialLimitSwitch == LOW) {
     StepperMotor (1);
   }
   else{
-    Ring2AxialEncoder=0;
+    Ring2AxialEncoderCounter=0;
   }
 }
 }
