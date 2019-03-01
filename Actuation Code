@@ -1,6 +1,12 @@
 //This code is written for the Arduino IDE
 //The purpose of this code is to take a user defined polar coordinate and reconfigure an array to match those coordinates
-
+/*Notable functions:
+ * MotorState = StepperMotor (int StepCount, char MotorState, String WhichMotor )
+ * MotorState are listed in variable
+ * StepCount is the number of steps in 0.9° increments due to half stepping
+ * WhichMotor is set with Radial1, Axial1, Radial2 or Axial2
+ */
+ 
 //Variables
 int latchPin = 1;
 int dataPin = 1;
@@ -185,30 +191,104 @@ else if (whichRing == 2){
   latchPin = Ring2MotorLatchPin;
   dataPin = Ring2MotorDataPin;
 }
-  // turn off the output so the pins don't go high while shifting bits
   digitalWrite(latchPin, LOW);
-
-  // turn on the next highest bit in bitsToSend:
   bitWrite(bitsToSend, whichPin, whichState);
-
-  // shift the bits out:
   shiftOut(dataPin, PWM, MSBFIRST, bitsToSend);
-
-    // turn on the output so the LEDs can light up:
   digitalWrite(latchPin, HIGH);
 }
 
 //This function runs the motor
-void StepperMotor (int StepCount){
-  //set motor
-while(StepCount !=0){
-  if(StepCount > 0){
+char StepperMotor (int StepCount, char MotorState, String WhichMotor ){
+  //set motor, motor can be Radial1, Axial1, Radial2 or Axial2
+if(WhichMotor == "Radial1"){
+  int BLK = 1;
+  int ORG = 2;
+  int RED = 3;
+  int YEL = 4;
+  int Ring = 1;  
+}
+else if(WhichMotor == "Axial1"){
+  int BLK = 5;
+  int ORG = 6;
+  int RED = 7;
+  int YEL = 15;
+  int Ring = 1;  
+}
+else if(WhichMotor == "Radial2"){
+  int BLK = 1;
+  int ORG = 2;
+  int RED = 3;
+  int YEL = 4;
+  int Ring = 2;  
+}
+else if(WhichMotor == "Axial2"){
+  int BLK = 5;
+  int ORG = 6;
+  int RED = 7;
+  int YEL = 15;
+  int Ring = 2;  
+}
+if(StepCount > 0){
+  while(StepCount !=0){
   //implement state machine here
+  if (MotorState == 'A'){
+    registerWrite(RED, HIGH, Ring);
   }
-  else{
-    //if but reversed
+  else if (MotorState == 'B'){
+    registerWrite(BLK, LOW, Ring);
+  }
+  else if (MotorState == 'C'){
+    registerWrite(ORG, HIGH, Ring);
+  }
+  else if (MotorState == 'D'){
+    registerWrite(RED, LOW, Ring);
+  }
+  else if (MotorState == 'E'){
+    registerWrite(YEL, HIGH, Ring);
+  }
+  else if (MotorState == 'F'){
+    registerWrite(ORG, LOW, Ring);
+  }
+  else if (MotorState == 'G'){
+    registerWrite(BLK, HIGH, Ring);
+  }
+  else if (MotorState == 'H'){
+    registerWrite(YEL, LOW, Ring);
+  }
+  StepCount--;
+  }
+else if(StepCount < 0){
+    while(StepCount !=0){
+  //implement state machine here but reversed
+    if (MotorState == 'A'){
+    registerWrite(YEL, HIGH, Ring);
+  }
+  else if (MotorState == 'B'){
+    registerWrite(RED, LOW, Ring);
+  }
+  else if (MotorState == 'C'){
+    registerWrite(BLK, HIGH, Ring);
+  }
+  else if (MotorState == 'D'){
+    registerWrite(ORG, LOW, Ring);
+  }
+  else if (MotorState == 'E'){
+    registerWrite(RED, HIGH, Ring);
+  }
+  else if (MotorState == 'F'){
+    registerWrite(YEL, LOW, Ring);
+  }
+  else if (MotorState == 'G'){
+    registerWrite(ORG, HIGH, Ring);
+  }
+  else if (MotorState == 'H'){
+    registerWrite(BLK, LOW, Ring);
+  }
+  StepCount++;
+  }
   }
 }
+return MotorState;
 }
 
 //StartUp function, this zeros the array and encoders
@@ -216,28 +296,28 @@ void StartUp (){
   while( Ring1RadialEncoder && Ring1AxialEncoder && Ring1RadialEncoder && Ring1AxialEncoder != 0){
   digitalRead(Ring1RadialLimitSwitch);
   if (Ring1RadialLimitSwitch == LOW) {
-    StepperMotor (1);
+    Ring1RadialMotorState = StepperMotor (1,Ring1RadialMotorState,"Radial1");
   }
   else{
     Ring1RadialEncoderCounter=0;
   }
   digitalRead(Ring1AxialLimitSwitch);
   if (Ring1AxialLimitSwitch == LOW) {
-    StepperMotor (1);
+    Ring1AxialMotorState = StepperMotor (1,Ring1AxialMotorState,"Axial1");
   }
   else{
     Ring1AxialEncoderCounter=0;
   }
   digitalRead(Ring2RadialLimitSwitch);
   if (Ring2RadialLimitSwitch == LOW) {
-    StepperMotor (1);
+    Ring2RadialMotorState = StepperMotor (1,Ring2RadialMotorState,"Radial2");
   }
   else{
     Ring2RadialEncoderCounter=0;
   }
   digitalRead(Ring2AxialLimitSwitch);
   if (Ring2AxialLimitSwitch == LOW) {
-    StepperMotor (1);
+    Ring2AxialMotorState = StepperMotor (1,Ring2AxialMotorState,"Axial2");
   }
   else{
     Ring2AxialEncoderCounter=0;
@@ -255,5 +335,11 @@ void loop() {
     registerWrite(bitToSet, HIGH, 1);
     registerWrite(bitToSet, HIGH, 2);
   }
+  //set motors to state A
+  registerWrite(1, HIGH, 1);
+  registerWrite(5, HIGH, 1);
+  registerWrite(1, HIGH, 2);
+  registerWrite(5, HIGH, 2);
+  
   StartUp();
 }
