@@ -6,7 +6,7 @@
  * StepCount is the number of steps in 0.9° increments due to half stepping
  * WhichMotor is set with Radial1, Axial1, Radial2 or Axial2
  */
- 
+
 //Variables
 int latchPin = 1;
 int dataPin = 1;
@@ -237,60 +237,110 @@ if(StepCount > 0){
   while(StepCount !=0){
   //implement state machine here
   if (MotorState == 'A'){
+    registerWrite(BLK, HIGH, Ring);
     registerWrite(RED, HIGH, Ring);
+    registerWrite(ORG, LOW, Ring);
+    registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'B'){
     registerWrite(BLK, LOW, Ring);
+    registerWrite(RED, HIGH, Ring);
+    registerWrite(ORG, LOW, Ring);
+    registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'C'){
+    registerWrite(BLK, LOW, Ring);
+    registerWrite(RED, HIGH, Ring);
     registerWrite(ORG, HIGH, Ring);
+    registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'D'){
+    registerWrite(BLK, LOW, Ring);
     registerWrite(RED, LOW, Ring);
+    registerWrite(ORG, HIGH, Ring);
+    registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'E'){
+    registerWrite(BLK, LOW, Ring);
+    registerWrite(RED, LOW, Ring);
+    registerWrite(ORG, HIGH, Ring);
     registerWrite(YEL, HIGH, Ring);
   }
   else if (MotorState == 'F'){
+    registerWrite(BLK, LOW, Ring);
+    registerWrite(RED, LOW, Ring);
     registerWrite(ORG, LOW, Ring);
+    registerWrite(YEL, HIGH, Ring);
   }
   else if (MotorState == 'G'){
     registerWrite(BLK, HIGH, Ring);
+    registerWrite(RED, LOW, Ring);
+    registerWrite(ORG, LOW, Ring);
+    registerWrite(YEL, HIGH, Ring);
   }
   else if (MotorState == 'H'){
+    registerWrite(BLK, HIGH, Ring);
+    registerWrite(RED, LOW, Ring);
+    registerWrite(ORG, LOW, Ring);
     registerWrite(YEL, LOW, Ring);
   }
   StepCount--;
+  delay(250);
   }
 }
 else if(StepCount < 0){
     while(StepCount !=0){
   //implement state machine here but reversed
     if (MotorState == 'A'){
+    registerWrite(BLK, HIGH, Ring);
+    registerWrite(RED, LOW, Ring);
+    registerWrite(ORG, LOW, Ring);
     registerWrite(YEL, HIGH, Ring);
   }
   else if (MotorState == 'B'){
+    registerWrite(BLK, HIGH, Ring);
     registerWrite(RED, LOW, Ring);
+    registerWrite(ORG, LOW, Ring);
+    registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'C'){
     registerWrite(BLK, HIGH, Ring);
+    registerWrite(RED, HIGH, Ring);
+    registerWrite(ORG, LOW, Ring);
+    registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'D'){
+    registerWrite(BLK, LOW, Ring);
+    registerWrite(RED, HIGH, Ring);
     registerWrite(ORG, LOW, Ring);
+    registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'E'){
+    registerWrite(BLK, LOW, Ring);
     registerWrite(RED, HIGH, Ring);
+    registerWrite(ORG, HIGH, Ring);
+    registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'F'){
+    registerWrite(BLK, LOW, Ring);
+    registerWrite(RED, LOW, Ring);
+    registerWrite(ORG, HIGH, Ring);
     registerWrite(YEL, LOW, Ring);
   }
   else if (MotorState == 'G'){
+    registerWrite(BLK, LOW, Ring);
+    registerWrite(RED, LOW, Ring);
     registerWrite(ORG, HIGH, Ring);
+    registerWrite(YEL, HIGH, Ring);
   }
   else if (MotorState == 'H'){
     registerWrite(BLK, LOW, Ring);
+    registerWrite(RED, LOW, Ring);
+    registerWrite(ORG, LOW, Ring);
+    registerWrite(YEL, HIGH, Ring);
   }
   StepCount++;
+  delay(250);
   }
 }
 return MotorState;
@@ -340,11 +390,7 @@ void loop() {
     registerWrite(bitToSet, HIGH, 1);
     registerWrite(bitToSet, HIGH, 2);
   }
-  //set motors to state A
-  registerWrite(1, HIGH, 1);
-  registerWrite(5, HIGH, 1);
-  registerWrite(1, HIGH, 2);
-  registerWrite(5, HIGH, 2);
-  
+
+  Ring1RadialEncoderState = StepperMotor (10000, Ring1RadialEncoderState, "Radial1" );
   StartUp();
 }
