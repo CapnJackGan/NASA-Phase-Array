@@ -9,10 +9,10 @@
 */
 
 //Variables
-int Ring1RadialEncoderCounter = 1; //counter to keep track of encoder position
-int Ring1AxialEncoderCounter = 1;
-int Ring2RadialEncoderCounter = 1;
-int Ring2AxialEncoderCounter = 1;
+int Ring1RadialEncoderCounter = 10000; //counter to keep track of encoder position. Initially set high for startup sequence
+int Ring1AxialEncoderCounter = 10000;
+int Ring2RadialEncoderCounter = 10000;
+int Ring2AxialEncoderCounter = 10000;
 char Ring1RadialEncoderState = 'A'; //Encoder states
 char Ring1AxialEncoderState = 'A';
 char Ring2RadialEncoderState = 'A';
@@ -69,6 +69,7 @@ void setup() {
   pinMode(Ring2AxialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring2AxialEncoderChannelB, INPUT_PULLUP);
   pinMode(Ring2AxialEncoderIndex, INPUT_PULLUP);
+  
   //initiate encoder interupts
   attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelA), Ring1RadialEncoderAInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelB), Ring1RadialEncoderBInterrupt, CHANGE);
@@ -264,38 +265,42 @@ char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) 
 }
 
 //StartUp function, this zeros the array and encoders
-//void StartUp (){
-//  while( Ring1RadialEncoderCounter && Ring1AxialEncoderCounter && Ring1RadialEncoderCounter && Ring1AxialEncoderCounter != 0){
-//  digitalRead(Ring1RadialLimitSwitch);
-//  if (Ring1RadialLimitSwitch == LOW) {
-//    Ring1RadialMotorState = StepperMotor (1,Ring1RadialMotorState,"Radial1");
-//  }
-//  else{
-//    Ring1RadialEncoderCounter=0;
-//  }
-//  digitalRead(Ring1AxialLimitSwitch);
-//  if (Ring1AxialLimitSwitch == LOW) {
-//    Ring1AxialMotorState = StepperMotor (1,Ring1AxialMotorState,"Axial1");
-//  }
-//  else{
-//    Ring1AxialEncoderCounter=0;
-//  }
-//  digitalRead(Ring2RadialLimitSwitch);
-//  if (Ring2RadialLimitSwitch == LOW) {
-//    Ring2RadialMotorState = StepperMotor (1,Ring2RadialMotorState,"Radial2");
-//  }
-//  else{
-//    Ring2RadialEncoderCounter=0;
-//  }
-//  digitalRead(Ring2AxialLimitSwitch);
-//  if (Ring2AxialLimitSwitch == LOW) {
-//    Ring2AxialMotorState = StepperMotor (1,Ring2AxialMotorState,"Axial2");
-//  }
-//  else{
-//    Ring2AxialEncoderCounter=0;
-//  }
-//}
-//}
+void StartUp (){
+  while( Ring1RadialEncoderCounter && Ring1AxialEncoderCounter && Ring1RadialEncoderCounter && Ring1AxialEncoderCounter != 0){
+    
+  int PrevRing1RadialEncoderCounter = Ring1RadialEncoderCounter;
+  if (Ring1RadialEncoderCounter != 0){
+  Ring1RadialMotorState = StepperMotor (-2, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin );
+  if (PrevRing1RadialEncoderCounter-Ring1RadialEncoderCounter >=3){
+    Ring1RadialEncoderCounter=0;
+  }
+}
+
+  int PrevRing1AxialEncoderCounter = Ring1AxialEncoderCounter;
+  if (Ring1AxialEncoderCounter != 0){
+  Ring1AxialMotorState = StepperMotor (-2, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin );
+  if (PrevRing1AxialEncoderCounter-Ring1AxialEncoderCounter >=3){
+    Ring1AxialEncoderCounter=0;
+  }
+}
+
+  int PrevRing2RadialEncoderCounter = Ring2RadialEncoderCounter;
+  if (Ring2RadialEncoderCounter != 0){
+  Ring2RadialMotorState = StepperMotor (-2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin );
+  if (PrevRing2RadialEncoderCounter-Ring2RadialEncoderCounter >=3){
+    Ring2RadialEncoderCounter=0;
+  }
+}
+
+  int PrevRing2AxialEncoderCounter = Ring2AxialEncoderCounter;
+  if (Ring2AxialEncoderCounter != 0){
+  Ring2AxialMotorState = StepperMotor (-2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin );
+  if (PrevRing2AxialEncoderCounter-Ring2AxialEncoderCounter >=3){
+    Ring2AxialEncoderCounter=0;
+  }
+}
+  }
+}
 
 void loop() {
 
