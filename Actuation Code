@@ -1,15 +1,14 @@
 //This code is written for the Arduino IDE
 //The purpose of this code is to take a user defined polar coordinate and reconfigure an array to match those coordinates
 /*Notable functions:
- * MotorState = StepperMotor (int StepCount, char MotorState, String WhichMotor )
- * MotorState are listed in variable
- * StepCount is the number of steps in 0.9° increments due to half stepping
- * WhichMotor is set with Radial1, Axial1, Radial2 or Axial2
- */
- 
+   MotorState = StepperMotor (int StepCount, char MotorState, int LP, int DP )
+   MotorState are listed in variable
+   StepCount is the number of steps in 0.9° increments due to half stepping
+   LP is the Latch Pin, see pinout chart
+   DP is the Data Pin, see pinout chart
+*/
+
 //Variables
-int latchPin = 1;
-int dataPin = 1;
 int Ring1RadialEncoderCounter = 1; //counter to keep track of encoder position
 int Ring1AxialEncoderCounter = 1;
 int Ring2RadialEncoderCounter = 1;
@@ -24,327 +23,281 @@ char Ring2RadialMotorState = 'A';
 char Ring2AxialMotorState = 'A';
 
 //Set Pins, see pinout chart
-const int Ring1RadialLimitSwitch = 2;
-const int Ring1AxialLimitSwitch = 3;
+//For shift registers, Data to pin 14 SER, PMW to 11 SRCLK, Latch 12 RCLK, pull pin 16 and 10 high and ground pin 8 and 13
+const int Ring1RadialMotorLatchPin = 2; //Ring 1 Radial
+const int Ring1RadialMotorDataPin = 3;
 const int PWM = 4;
-const int Ring1MotorLatchPin = 6;
-const int Ring1MotorDataPin = 7;
+const int Ring1AxialMotorLatchPin = 6; //Ring 1 Axial
+const int Ring1AxialMotorDataPin = 7;
 const int Ring1RadialEncoderChannelA = 8;
 const int Ring1RadialEncoderChannelB = 9;
 const int Ring1RadialEncoderIndex = 10;
 const int Ring1AxialEncoderChannelA = 11;
 const int Ring1AxialEncoderChannelB = 12;
 const int Ring1AxialEncoderIndex = 13;
-const int Ring1Brake = 15;
-const int Ring2RadialLimitSwitch = 20;
-const int Ring2AxialLimitSwitch = 21;
-const int Ring2MotorLatchPin = 24;
-const int Ring2MotorDataPin = 25;
+const int Ring2RadialMotorLatchPin = 22; //Ring 2 Radial
+const int Ring2RadialMotorDataPin = 23;
+const int Ring2AxialMotorLatchPin = 24; //Ring 2 Axial
+const int Ring2AxialMotorDataPin = 25;
 const int Ring2RadialEncoderChannelA = 26;
 const int Ring2RadialEncoderChannelB = 27;
 const int Ring2RadialEncoderIndex = 28;
 const int Ring2AxialEncoderChannelA = 29;
 const int Ring2AxialEncoderChannelB = 30;
 const int Ring2AxialEncoderIndex = 31;
-const int Ring2Brake = 33;
 
 void setup() {
-//configure pins to input or output
-pinMode(Ring1RadialLimitSwitch, INPUT);
-pinMode(Ring1AxialLimitSwitch, INPUT);
-pinMode(PWM, OUTPUT);
-pinMode(Ring1MotorLatchPin, OUTPUT);
-pinMode(Ring1MotorDataPin, OUTPUT);
-pinMode(Ring1RadialEncoderChannelA, INPUT_PULLUP);
-pinMode(Ring1RadialEncoderChannelB, INPUT_PULLUP);
-pinMode(Ring1RadialEncoderIndex, INPUT_PULLUP);
-pinMode(Ring1AxialEncoderChannelA, INPUT_PULLUP);
-pinMode(Ring1AxialEncoderChannelB, INPUT_PULLUP);
-pinMode(Ring1AxialEncoderIndex, INPUT_PULLUP);
-pinMode(Ring1Brake, OUTPUT);
-pinMode(Ring2RadialLimitSwitch, INPUT);
-pinMode(Ring2AxialLimitSwitch, INPUT);
-pinMode(Ring2MotorLatchPin, OUTPUT);
-pinMode(Ring2MotorDataPin, OUTPUT);
-pinMode(Ring2RadialEncoderChannelA, INPUT_PULLUP);
-pinMode(Ring2RadialEncoderChannelB, INPUT_PULLUP);
-pinMode(Ring2RadialEncoderIndex, INPUT_PULLUP);
-pinMode(Ring2AxialEncoderChannelA, INPUT_PULLUP);
-pinMode(Ring2AxialEncoderChannelB, INPUT_PULLUP);
-pinMode(Ring2AxialEncoderIndex, INPUT_PULLUP);
-pinMode(Ring2Brake, OUTPUT);
-Serial.begin(9600);
-Serial.println("reset");
-//initiate encoder interupts
-attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelA), Ring1RadialEncoderAInterrupt, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelB), Ring1RadialEncoderBInterrupt, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelA), Ring1AxialEncoderAInterrupt, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelB), Ring1AxialEncoderBInterrupt, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelA), Ring2RadialEncoderAInterrupt, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelB), Ring2RadialEncoderBInterrupt, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelA), Ring2AxialEncoderAInterrupt, CHANGE);
-attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelB), Ring2AxialEncoderBInterrupt, CHANGE);
+  //configure pins to input or output
+  pinMode(PWM, OUTPUT);
+  pinMode(Ring1RadialMotorLatchPin, OUTPUT);
+  pinMode(Ring1RadialMotorDataPin, OUTPUT);
+  pinMode(Ring1AxialMotorLatchPin, OUTPUT);
+  pinMode(Ring1AxialMotorDataPin, OUTPUT);
+  pinMode(Ring1RadialEncoderChannelA, INPUT_PULLUP);
+  pinMode(Ring1RadialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring1RadialEncoderIndex, INPUT_PULLUP);
+  pinMode(Ring1AxialEncoderChannelA, INPUT_PULLUP);
+  pinMode(Ring1AxialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring1AxialEncoderIndex, INPUT_PULLUP);
+  pinMode(Ring2RadialMotorLatchPin, OUTPUT);
+  pinMode(Ring2RadialMotorDataPin, OUTPUT);
+  pinMode(Ring2AxialMotorLatchPin, OUTPUT);
+  pinMode(Ring2AxialMotorDataPin, OUTPUT);
+  pinMode(Ring2RadialEncoderChannelA, INPUT_PULLUP);
+  pinMode(Ring2RadialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring2RadialEncoderIndex, INPUT_PULLUP);
+  pinMode(Ring2AxialEncoderChannelA, INPUT_PULLUP);
+  pinMode(Ring2AxialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring2AxialEncoderIndex, INPUT_PULLUP);
+  //initiate encoder interupts
+  attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelA), Ring1RadialEncoderAInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelB), Ring1RadialEncoderBInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelA), Ring1AxialEncoderAInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelB), Ring1AxialEncoderBInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelA), Ring2RadialEncoderAInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelB), Ring2RadialEncoderBInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelA), Ring2AxialEncoderAInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelB), Ring2AxialEncoderBInterrupt, CHANGE);
 }
 
 //Encoder interupts
-void Ring1RadialEncoderAInterrupt(){
-EncoderInterupt(Ring1RadialEncoderState, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Ring1RadialEncoderCounter);
+void Ring1RadialEncoderAInterrupt() {
+  EncoderInterupt(Ring1RadialEncoderState, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Ring1RadialEncoderCounter);
 }
 
-void Ring1RadialEncoderBInterrupt(){
-EncoderInterupt(Ring1RadialEncoderState, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Ring1RadialEncoderCounter);
+void Ring1RadialEncoderBInterrupt() {
+  EncoderInterupt(Ring1RadialEncoderState, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Ring1RadialEncoderCounter);
 }
 
-void Ring1AxialEncoderAInterrupt(){
-EncoderInterupt(Ring1AxialEncoderState, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Ring1AxialEncoderCounter);
+void Ring1AxialEncoderAInterrupt() {
+  EncoderInterupt(Ring1AxialEncoderState, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Ring1AxialEncoderCounter);
 }
 
-void Ring1AxialEncoderBInterrupt(){
-EncoderInterupt(Ring1AxialEncoderState, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Ring1AxialEncoderCounter);
+void Ring1AxialEncoderBInterrupt() {
+  EncoderInterupt(Ring1AxialEncoderState, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Ring1AxialEncoderCounter);
 }
 //Ring 2 interupts
-void Ring2RadialEncoderAInterrupt(){
-EncoderInterupt(Ring2RadialEncoderState, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Ring2RadialEncoderCounter);
+void Ring2RadialEncoderAInterrupt() {
+  EncoderInterupt(Ring2RadialEncoderState, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Ring2RadialEncoderCounter);
 }
 
-void Ring2RadialEncoderBInterrupt(){
-EncoderInterupt(Ring2RadialEncoderState, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Ring2RadialEncoderCounter);
+void Ring2RadialEncoderBInterrupt() {
+  EncoderInterupt(Ring2RadialEncoderState, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Ring2RadialEncoderCounter);
 }
 
-void Ring2AxialEncoderAInterrupt(){
-EncoderInterupt(Ring2AxialEncoderState, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Ring2AxialEncoderCounter);
+void Ring2AxialEncoderAInterrupt() {
+  EncoderInterupt(Ring2AxialEncoderState, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Ring2AxialEncoderCounter);
 }
 
-void Ring2AxialEncoderBInterrupt(){
-EncoderInterupt(Ring2AxialEncoderState, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Ring2AxialEncoderCounter);
+void Ring2AxialEncoderBInterrupt() {
+  EncoderInterupt(Ring2AxialEncoderState, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Ring2AxialEncoderCounter);
 }
 
 //Encoder interupt function
-void EncoderInterupt(char State, int ChannelA, int ChannelB, int EncoderCounter){
+void EncoderInterupt(char State, int ChannelA, int ChannelB, int EncoderCounter) {
   char Previous = State;
-  int A = digitalRead(ChannelA);  
-  int B = digitalRead(ChannelB);  
- //Find encoder state
-  if (A == HIGH && B == HIGH){
+  int A = digitalRead(ChannelA);
+  int B = digitalRead(ChannelB);
+  //Find encoder state
+  if (A == HIGH && B == HIGH) {
     State = 'A';
-    }
-  else if (A == HIGH && B == LOW){
+  }
+  else if (A == HIGH && B == LOW) {
     State = 'B';
-    }
-  else if (A == LOW && B == HIGH){
+  }
+  else if (A == LOW && B == HIGH) {
     State = 'C';
-    }  
+  }
   else {
     State = 'D';
   }
-//Finds encoder direction using encoder states
-int Direction;
-  if (Previous == 'A'){
-    if (State == 'B'){
+  //Finds encoder direction using encoder states
+  int Direction;
+  if (Previous == 'A') {
+    if (State == 'B') {
       Direction = 1;
     }
-    else if (State == 'C'){
+    else if (State == 'C') {
       Direction = -1;
     }
   }
-  if (Previous == 'B'){
-    if (State == 'D'){
+  if (Previous == 'B') {
+    if (State == 'D') {
       Direction = 1;
     }
-    else if (State == 'A'){
+    else if (State == 'A') {
       Direction = -1;
     }
   }
-  if (Previous == 'C'){
-    if (State == 'A'){
+  if (Previous == 'C') {
+    if (State == 'A') {
       Direction = 1;
     }
-    else if (State == 'D'){
+    else if (State == 'D') {
       Direction = -1;
     }
   }
-  if (Previous == 'D'){
-    if (State == 'C'){
+  if (Previous == 'D') {
+    if (State == 'C') {
       Direction = 1;
     }
-    else if (State == 'B'){
+    else if (State == 'B') {
       Direction = -1;
     }
-  if (Direction > 0){
-    EncoderCounter++;
+    if (Direction > 0) {
+      EncoderCounter++;
+    }
+    else {
+      EncoderCounter--;
+    }
   }
-  else{
-    EncoderCounter--;
-  }
-}
-}
-
-// This function sends bits to the shift register for running the stepper motor
-void registerWrite(int whichPin, int whichState, int whichRing) {
-// the bits you want to send
-  byte bitsToSend = 0;
-if (whichRing == 1){
-  latchPin = Ring1MotorLatchPin;
-  dataPin = Ring1MotorDataPin;
-}
-else if (whichRing == 2){
-  latchPin = Ring2MotorLatchPin;
-  dataPin = Ring2MotorDataPin;
-}
-  digitalWrite(latchPin, LOW);
-  bitWrite(bitsToSend, whichPin, whichState);
-  shiftOut(dataPin, PWM, MSBFIRST, bitsToSend);
-  digitalWrite(latchPin, HIGH);
 }
 
 //This function runs the motor
-char StepperMotor (int StepCount, char MotorState, String WhichMotor ){
-  //set motor, motor can be Radial1, Axial1, Radial2 or Axial2
-int BLK;
-int ORG;
-int RED;
-int YEL;
-int Ring; 
-if(WhichMotor == "Radial1"){
-  BLK = 1;
-  ORG = 2;
-  RED = 3;
-  YEL = 4;
-  Ring = 1;  
-}
-else if(WhichMotor == "Axial1"){
-  BLK = 5;
-  ORG = 6;
-  RED = 7;
-  YEL = 15;
-  Ring = 1;  
-}
-else if(WhichMotor == "Radial2"){
-  BLK = 1;
-  ORG = 2;
-  RED = 3;
-  YEL = 4;
-  Ring = 2;  
-}
-else if(WhichMotor == "Axial2"){
-  BLK = 5;
-  ORG = 6;
-  RED = 7;
-  YEL = 15;
-  Ring = 2;  
-}
-if(StepCount > 0){
-  while(StepCount !=0){
-  //implement state machine here
-  if (MotorState == 'A'){
-    registerWrite(RED, HIGH, Ring);
+char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) {
+  byte data;
+
+  if (StepCount > 0) {
+    for (int i = 0; i <= StepCount; i++) {
+      //implement state machine here
+      if (MotorState == 'A') {
+        data = 0b00000110;
+        MotorState = 'B';
+      }
+      else if (MotorState == 'B') {
+        data = 0b00000100;
+        MotorState = 'C';
+      }
+      else if (MotorState == 'C') {
+        data = 0b00001100;
+        MotorState = 'D';
+      }
+      else if (MotorState == 'D') {
+        data = 0b00001000;
+        MotorState = 'E';
+      }
+      else if (MotorState == 'E') {
+        data = 0b00011000;
+        MotorState = 'F';
+      }
+      else if (MotorState == 'F') {
+        data = 0b00010000;
+        MotorState = 'G';
+      }
+      else if (MotorState == 'G') {
+        data = 0b00010010;
+        MotorState = 'H';
+      }
+      else if (MotorState == 'H') {
+        data = 0b00000010;
+        MotorState = 'A';
+      }
+      digitalWrite(LP, LOW);
+      shiftOut(DP, 4, MSBFIRST, data);//4 is the PWM pin
+      digitalWrite (LP, HIGH);
+      delay(250);
+    }
   }
-  else if (MotorState == 'B'){
-    registerWrite(BLK, LOW, Ring);
+  else if (StepCount < 0) {
+    while (StepCount != 0) {
+      //implement state machine here but reversed
+      if (MotorState == 'H') {
+        data = 0b00010000;
+        MotorState = 'G';
+      }
+      else if (MotorState == 'G') {
+        data = 0b00011000;
+        MotorState = 'F';
+      }
+      else if (MotorState == 'F') {
+        data = 0b00001000;
+        MotorState = 'E';
+      }
+      else if (MotorState == 'E') {
+        data = 0b00001100;
+        MotorState = 'D';
+      }
+      else if (MotorState == 'D') {
+        data = 0b00000100;
+        MotorState = 'C';
+      }
+      else if (MotorState == 'C') {
+        data = 0b00000110;
+        MotorState = 'B';
+      }
+      else if (MotorState == 'B') {
+        data = 0b00000010;
+        MotorState = 'A';
+      }
+      else if (MotorState == 'A') {
+        data = 0b00010010;
+        MotorState = 'H';
+      }
+      StepCount++;
+      digitalWrite(LP, LOW);
+      shiftOut(DP, 4, MSBFIRST, data); //4 is the PWM pin
+      digitalWrite (LP, HIGH);
+      delay(250);
+    }
   }
-  else if (MotorState == 'C'){
-    registerWrite(ORG, HIGH, Ring);
-  }
-  else if (MotorState == 'D'){
-    registerWrite(RED, LOW, Ring);
-  }
-  else if (MotorState == 'E'){
-    registerWrite(YEL, HIGH, Ring);
-  }
-  else if (MotorState == 'F'){
-    registerWrite(ORG, LOW, Ring);
-  }
-  else if (MotorState == 'G'){
-    registerWrite(BLK, HIGH, Ring);
-  }
-  else if (MotorState == 'H'){
-    registerWrite(YEL, LOW, Ring);
-  }
-  StepCount--;
-  }
-}
-else if(StepCount < 0){
-    while(StepCount !=0){
-  //implement state machine here but reversed
-    if (MotorState == 'A'){
-    registerWrite(YEL, HIGH, Ring);
-  }
-  else if (MotorState == 'B'){
-    registerWrite(RED, LOW, Ring);
-  }
-  else if (MotorState == 'C'){
-    registerWrite(BLK, HIGH, Ring);
-  }
-  else if (MotorState == 'D'){
-    registerWrite(ORG, LOW, Ring);
-  }
-  else if (MotorState == 'E'){
-    registerWrite(RED, HIGH, Ring);
-  }
-  else if (MotorState == 'F'){
-    registerWrite(YEL, LOW, Ring);
-  }
-  else if (MotorState == 'G'){
-    registerWrite(ORG, HIGH, Ring);
-  }
-  else if (MotorState == 'H'){
-    registerWrite(BLK, LOW, Ring);
-  }
-  StepCount++;
-  }
-}
-return MotorState;
+  return MotorState;
 }
 
 //StartUp function, this zeros the array and encoders
-void StartUp (){
-  while( Ring1RadialEncoderCounter && Ring1AxialEncoderCounter && Ring1RadialEncoderCounter && Ring1AxialEncoderCounter != 0){
-  digitalRead(Ring1RadialLimitSwitch);
-  if (Ring1RadialLimitSwitch == LOW) {
-    Ring1RadialMotorState = StepperMotor (1,Ring1RadialMotorState,"Radial1");
-  }
-  else{
-    Ring1RadialEncoderCounter=0;
-  }
-  digitalRead(Ring1AxialLimitSwitch);
-  if (Ring1AxialLimitSwitch == LOW) {
-    Ring1AxialMotorState = StepperMotor (1,Ring1AxialMotorState,"Axial1");
-  }
-  else{
-    Ring1AxialEncoderCounter=0;
-  }
-  digitalRead(Ring2RadialLimitSwitch);
-  if (Ring2RadialLimitSwitch == LOW) {
-    Ring2RadialMotorState = StepperMotor (1,Ring2RadialMotorState,"Radial2");
-  }
-  else{
-    Ring2RadialEncoderCounter=0;
-  }
-  digitalRead(Ring2AxialLimitSwitch);
-  if (Ring2AxialLimitSwitch == LOW) {
-    Ring2AxialMotorState = StepperMotor (1,Ring2AxialMotorState,"Axial2");
-  }
-  else{
-    Ring2AxialEncoderCounter=0;
-  }
-}
-}
+//void StartUp (){
+//  while( Ring1RadialEncoderCounter && Ring1AxialEncoderCounter && Ring1RadialEncoderCounter && Ring1AxialEncoderCounter != 0){
+//  digitalRead(Ring1RadialLimitSwitch);
+//  if (Ring1RadialLimitSwitch == LOW) {
+//    Ring1RadialMotorState = StepperMotor (1,Ring1RadialMotorState,"Radial1");
+//  }
+//  else{
+//    Ring1RadialEncoderCounter=0;
+//  }
+//  digitalRead(Ring1AxialLimitSwitch);
+//  if (Ring1AxialLimitSwitch == LOW) {
+//    Ring1AxialMotorState = StepperMotor (1,Ring1AxialMotorState,"Axial1");
+//  }
+//  else{
+//    Ring1AxialEncoderCounter=0;
+//  }
+//  digitalRead(Ring2RadialLimitSwitch);
+//  if (Ring2RadialLimitSwitch == LOW) {
+//    Ring2RadialMotorState = StepperMotor (1,Ring2RadialMotorState,"Radial2");
+//  }
+//  else{
+//    Ring2RadialEncoderCounter=0;
+//  }
+//  digitalRead(Ring2AxialLimitSwitch);
+//  if (Ring2AxialLimitSwitch == LOW) {
+//    Ring2AxialMotorState = StepperMotor (1,Ring2AxialMotorState,"Axial2");
+//  }
+//  else{
+//    Ring2AxialEncoderCounter=0;
+//  }
+//}
+//}
 
 void loop() {
-  if (Serial.available() > 0) {
-  // ASCII '0' through '9' characters are represented by the values 48 through 57
-  // so if the user types a number from 0 through 9 in ASCII, you can subtract 48 to get the actual value:
-    int bitToSet = Serial.read() - 48;
 
-  // write to the shift register with the correct bit set high:
-    registerWrite(bitToSet, HIGH, 1);
-    registerWrite(bitToSet, HIGH, 2);
-  }
-  //set motors to state A
-  registerWrite(1, HIGH, 1);
-  registerWrite(5, HIGH, 1);
-  registerWrite(1, HIGH, 2);
-  registerWrite(5, HIGH, 2);
-  
-  StartUp();
+  Ring1AxialMotorState = StepperMotor (-100, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin );
 }
