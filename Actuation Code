@@ -270,10 +270,10 @@ char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) 
 int Frequency = ;  //Where these people need to enter in desired frequency, no idea how to do this
 int stepstoangle; //This integer will hold how many steps we need to get to the closest angle to 0degrees
 int stepstoangle2;
-//initialize the stepper library on pins
+//initialize the stepper library on digital pins
 //outer most ring is Axialone, next ring is Axialtwo
-Stepper Axialone(stepstoangle, 1, 2, 3, 4); //The outer most ring is axial one
-Stepper Axialtwo (stepstoangle2, 1, 2, 3, 4); //Are both axial motors on the same library pins?
+Stepper Axialone(stepstoangle, 6, 7); //I believe these are the correct pins?
+Stepper Axialtwo (stepstoangle2, 24, 25); //I believe these are the correct pins?
 
 void setup() {
   //set the speeds at 30rpm
