@@ -264,6 +264,112 @@ char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) 
   return MotorState;
 }
 
+
+// This function moves the motors to desired positions
+
+int Frequency = ;  //NOT SURE HOW TO DO THIS Where these people need to enter in desired frequency
+int stepstoangle; //This integer will hold how many steps we need to get to the closest angle to 0degrees
+int stepstoangle2;
+//initialize the stepper library on pins
+//outer most ring is radialone, next ring is radialtwo
+Stepper Radialone(stepstoangle, 1, 2, 3, 4); //The outer most ring is radial one
+Stepper Radialtwo (stepstoangle2, 1, 2, 3, 4); //Are both radial motors on the same library pins?
+
+void setup() {
+  //set the speeds at 30rpm
+  Radialone.setSpeed(30);
+  Radialtwo.setSpeed(30);
+  //Initialize serial port
+  Serial.begin(9600);
+}
+
+
+if (Frequency = 16000 ) {
+  void Movement() {
+    //step desired revolutions
+    Serial.println("Repositioning for 16kHz");
+    stepstoangle = (5.6 / .9); //calculates number of steps needed to get to closest angle from 0
+    Radialone.step(stepstoangle); //moves that many steps
+
+    stepstoangle2 = (24.707); //calculates number of steps needed to get to closes angle from 0
+    Radialtwo.step(stepstoangle2); //moves that many steps
+  }
+}
+else if (Frequency = 11250) {
+  void Movement() {
+    //step desired revolutions
+    Serial.println("Repositioning for 11.25kHz.");
+    stepstoangle = (18.32 / .9); //
+    Radialone.step(stepstoangle);
+
+    stepstoangle2 = (10.6 / .9); //calculates number of steps needed to get to closes angle from 0
+    Radialtwo.step(stepstoangle2); //moves that many steps
+
+  }
+  else if (Frequency = 7150) {
+    void Movement() {
+      //step desired revolutions
+      Serial.println("Repositioning for 7.15kHz");
+      stepstoangle = (23.07 / .9) //calculates number of steps needed to get to closest angle
+                     Radialone.step(stepstoangle) //moves that many steps
+
+                     stepstoangle2 = (17.45 / .9); //calculates number of steps needed to get to closes angle from 0
+      Radialtwo.step(stepstoangle2); //moves that many steps
+    }
+
+  }
+  else if (Frequency = 4500) {
+    void Movement() {
+      //step desired revolutions
+      Serial.println("Repositioning for 4.5kHz");
+      stepstoangle = (33.348 / .9) //calculates number of steps needed to get to closest angle
+                     Radialone.step(stepstoangle) //moves that many steps
+
+                     stepstoangle2 = (20.88 / .9); //calculates number of steps needed to get to closes angle from 0
+      Radialtwo.step(stepstoangle2); //moves that many steps
+    }
+  }
+  else if (Frequency = 2825) {
+    void Movement() {
+      //step desired revolutions
+      Serial.println("Repositioning for 2.825kHz");
+      stepstoangle = (37.965 / .9) //calculates number of steps needed to get to closest angle
+                     Radialone.step(stepstoangle) //moves that many steps
+
+                     stepstoangle2 = (25.495 / .9); //calculates number of steps needed to get to closes angle from 0
+      Radialtwo.step(stepstoangle2); //moves that many steps
+    }
+
+  }
+  else if (Frequency = 1800) {
+    void Movement() {
+      //step desired revolutions
+      Serial.println("Repositioning for 1.8kHz");
+      stepstoangle = (30.679 / .9) //calculates number of steps needed to get to closest angle
+                     Radialone.step(stepstoangle) //moves that many steps
+
+                     stepstoangle2 = (8.52 / .9); //calculates number of steps needed to get to closes angle from 0
+      Radialtwo.step(stepstoangle2); //moves that many steps
+    }
+
+  }
+  else if (Frequency = 1125) {
+    void Movement() {
+      //step desired revolutions
+      Serial.println("Repositioning for 1.125kHz");
+      stepstoangle = (39.466 / .9) //calculates number of steps needed to get to closest angle
+                     Radialone.step(stepstoangle) //moves that many steps
+
+                     stepstoangle2 = (33.42533 / .9); //calculates number of steps needed to get to closes angle from 0
+      Radialtwo.step(stepstoangle2); //moves that many steps
+    }
+
+  }
+  else {
+    Serial.println("Error! You did not enter a valid frequency"); //If they do not enter one of the 7 frequencies it will not move
+  }
+
+
 //StartUp function, this zeros the array and encoders
 void StartUp (){
   while( Ring1RadialEncoderCounter && Ring1AxialEncoderCounter && Ring1RadialEncoderCounter && Ring1AxialEncoderCounter != 0){
