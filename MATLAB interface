@@ -5,11 +5,17 @@ disp('Available com ports are:')
 disp(seriallist)
 com = input('Type in desired com port ','s');
 s = serial(com);
-set(s,'BaudRate',4800);
+set(s,'BaudRate',4800);%check Baud rate in Arduino Code
 fopen(s);
-frequency = input('Type in a frequency, options: 1125, 1800, 2825, 4500, 7150, 11250 or 16000');
+while true
+frequency = input('Type in a frequency, options: 1125, 1800, 2825, 4500, 7150, 11250 or 16000, type 0 to end session');
 if frequency == 1125|1800|2825|4500|7150|11250|16000
-fprintf(s,frequency)
+    fprintf(s,frequency)
+elseif frequency == 0
+        break
+else
+    disp('Chosen frequency is unavailable')
+end
 end
 fclose(s)
 delete(s)
