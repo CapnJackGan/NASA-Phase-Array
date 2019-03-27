@@ -9,9 +9,9 @@
 */
 
 //Variables
-int Ring1RadialEncoderCounter = 10000; //counter to keep track of encoder position. Initially set high for startup sequence
+int Ring1RadialEncoderCounter = 100000; //counter to keep track of encoder position. Initially set high for startup sequence
 int Ring1AxialEncoderCounter = 10000;
-int Ring2RadialEncoderCounter = 10000;
+int Ring2RadialEncoderCounter = 100000;
 int Ring2AxialEncoderCounter = 10000;
 char Ring1RadialEncoderState = 'A'; //Encoder states
 char Ring1AxialEncoderState = 'A';
@@ -79,6 +79,12 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelB), Ring2RadialEncoderBInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelA), Ring2AxialEncoderAInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelB), Ring2AxialEncoderBInterrupt, CHANGE);
+
+  //Iniatiate serial port
+  Serial.begin(9600);
+
+//Launch Startup Sequence
+  StartUp();
 }
 
 //Encoder interupts
@@ -169,6 +175,7 @@ void EncoderInterupt(char State, int ChannelA, int ChannelB, int EncoderCounter)
 
 //This function runs the motor
 char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) {
+  
   byte data;
 
   if (StepCount > 0) {
@@ -209,7 +216,7 @@ char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) 
       digitalWrite(LP, LOW);
       shiftOut(DP, 4, MSBFIRST, data);//4 is the PWM pin
       digitalWrite (LP, HIGH);
-      delay(250);//delay used so motor doesn't try to spin impossibly fast, specific number needs fine tuning
+      delay(20);//delay used so motor doesn't try to spin impossibly fast, specific number needs fine tuning
     }
   }
   else if (StepCount < 0) {
@@ -251,220 +258,141 @@ char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) 
       digitalWrite(LP, LOW);
       shiftOut(DP, 4, MSBFIRST, data); //4 is the PWM pin
       digitalWrite (LP, HIGH);
-      delay(250);//delay used so motor doesn't try to spin impossibly fast
+      delay(20);//delay used so motor doesn't try to spin impossibly fast
     }
   }
   return MotorState;
 }
 
 //The following is how far the motors need to move to get to their intended position
-int Frequency = ;  //Where these people need to enter in desired frequency, no idea how to do this
-int stepstoangle; //This integer will hold how many steps we need to get to the closest angle to 0degrees
-int stepstoangle2;
-int stepstoradius; //This integer will hold how many steps we need to get to proper radius
-int stepstoradius2;
+void ExecuteSteps(){
+  Serial.println("Please enter your desired frequency");
+  int Frequency;
+  if (Serial.available() > 0) {
+    // read the incoming byte:
+    Frequency = Serial.read();
+  }
+int desiredposition;
+int desiredposition2;
+int intendedposition;
+int intendedposition2;
 
-
-if (Frequency = 16000 ) {
-  void Movement() {
-    
+if (Frequency = 16000 ) {  
 //Running motors for axial locations
-
 int desiredposition = (5.6/.9); //determining the position in terms of steps
-stepstoangle = desiredposition - Ring1AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring1AxialMotorState = StepperMotor(stepstoangle, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin); //Motor will move
-Serial.println(Ring1AxialEncoderState); //Calls the new encoder count to print out
-
-int desiredpositoin2 = (24.707); //determining the position in terms of steps
-stepstoangle2 = desiredposition2 - Ring2AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring2AxialMotorState = StepperMotor(stepstoangle2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
-Serial.println(Ring2AxialEncoderState); //Calls the new encoder count to print out
-
+int desiredposition2 = (24.7/.9); //determining the position in terms of steps
 
 // Now running the motors for the radial distances
-
 int intendedposition = 28800;
-stepstoradius = intendedposition - Ring1RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring1RadialMotorState = StepperMotor(stepstoradius, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move
-Serial.println(Ring1RadialEncoderState); //Calls the new encoder count to print out
-
 int intendedposition2 = 11760;
-stepstoradius2 = intendedposition2 - Ring2RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring2RadialMotorState = StepperMotor(stepstoradius2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move
-Serial.println(Ring2RadialEncoderState); //Calls the new encoder count to print out
- 
-  }
 }
+
 else if (Frequency = 11250) {
-  void Movement() {
-
-  int desiredposition = (18.32/.9); //determining the position in terms of steps
-stepstoangle = desiredposition - Ring1AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring1AxialMotorState = StepperMotor(stepstoangle, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin); //Motor will move
-Serial.println(Ring1AxialEncoderState); //Calls the new encoder count to print out
-
+int desiredposition = (18.32/.9); //determining the position in terms of steps
 int desiredpositoin2 = (10.6/.9); //determining the position in terms of steps
-stepstoangle2 = desiredposition2 - Ring2AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring2AxialMotorState = StepperMotor(stepstoangle2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
-Serial.println(Ring2AxialEncoderState); //Calls the new encoder count to print out
-
 
 // Now running the motors for the radial distances
-
 int intendedposition = 36800;
-stepstoradius = intendedposition - Ring1RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring1RadialMotorState = StepperMotor(stepstoradius, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move
-Serial.println(Ring1RadialEncoderState); //Calls the new encoder count to print out
-
 int intendedposition2 = 18880;
-stepstoradius2 = intendedposition2 - Ring2RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring2RadialMotorState = StepperMotor(stepstoradius2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move
-Serial.println(Ring2RadialEncoderState); //Calls the new encoder count to print out
+}
 
-  }
-  else if (Frequency = 7150) {
-    void Movement() {
-      
-    int desiredposition = (23.07/.9); //determining the position in terms of steps
-stepstoangle = desiredposition - Ring1AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring1AxialMotorState = StepperMotor(stepstoangle, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin); //Motor will move
-Serial.println(Ring1AxialEncoderState); //Calls the new encoder count to print out
-
+else if (Frequency = 7150) {
+int desiredposition = (23.07/.9); //determining the position in terms of steps
 int desiredpositoin2 = (17.45/.9); //determining the position in terms of steps
-stepstoangle2 = desiredposition2 - Ring2AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring2AxialMotorState = StepperMotor(stepstoangle2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
-Serial.println(Ring2AxialEncoderState); //Calls the new encoder count to print out
-
 
 // Now running the motors for the radial distances
-
 int intendedposition = 44800;
-stepstoradius = intendedposition - Ring1RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring1RadialMotorState = StepperMotor(stepstoradius, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move
-Serial.println(Ring1RadialEncoderState); //Calls the new encoder count to print out
-
 int intendedposition2 = 25920;
-stepstoradius2 = intendedposition2 - Ring2RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring2RadialMotorState = StepperMotor(stepstoradius2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move
-Serial.println(Ring2RadialEncoderState); //Calls the new encoder count to print out
     }
-
-  }
+    
   else if (Frequency = 4500) {
-    void Movement() {
-      
 int desiredposition = (33.348/.9); //determining the position in terms of steps
-stepstoangle = desiredposition - Ring1AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring1AxialMotorState = StepperMotor(stepstoangle, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin); //Motor will move
-Serial.println(Ring1AxialEncoderState); //Calls the new encoder count to print out
-
 int desiredpositoin2 = (20.88/.9); //determining the position in terms of steps
-stepstoangle2 = desiredposition2 - Ring2AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring2AxialMotorState = StepperMotor(stepstoangle2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
-Serial.println(Ring2AxialEncoderState); //Calls the new encoder count to print out
-
 
 // Now running the motors for the radial distances
-
 int intendedposition = 52800;
-stepstoradius = intendedposition - Ring1RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring1RadialMotorState = StepperMotor(stepstoradius, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move
-Serial.println(Ring1RadialEncoderState); //Calls the new encoder count to print out
-
-int intendedposition2 = 32962.4;
-stepstoradius2 = intendedposition2 - Ring2RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring2RadialMotorState = StepperMotor(stepstoradius2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move
-Serial.println(Ring2RadialEncoderState); //Calls the new encoder count to print out
+int intendedposition2 = 32962;
     }
-  }
+    
   else if (Frequency = 2825) {
-    void Movement() {
-      
 int desiredposition = (37.965/.9); //determining the position in terms of steps
-stepstoangle = desiredposition - Ring1AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring1AxialMotorState = StepperMotor(stepstoangle, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin); //Motor will move
-Serial.println(Ring1AxialEncoderState); //Calls the new encoder count to print out
-
 int desiredpositoin2 = (25.495/.9); //determining the position in terms of steps
-stepstoangle2 = desiredposition2 - Ring2AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring2AxialMotorState = StepperMotor(stepstoangle2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
-Serial.println(Ring2AxialEncoderState); //Calls the new encoder count to print out
 
 // Now running the motors for the radial distances
-
 int intendedposition = 60800;
-stepstoradius = intendedposition - Ring1RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring1RadialMotorState = StepperMotor(stepstoradius, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move
-Serial.println(Ring1RadialEncoderState); //Calls the new encoder count to print out
-
-int intendedposition2 = 40017.7;
-stepstoradius2 = intendedposition2 - Ring2RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring2RadialMotorState = StepperMotor(stepstoradius2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move
-Serial.println(Ring2RadialEncoderState); //Calls the new encoder count to print out
-
+int intendedposition2 = 40017;
     }
 
-  }
   else if (Frequency = 1800) {
-    void Movement() {
-      
-    int desiredposition = (30.679/.9); //determining the position in terms of steps
-stepstoangle = desiredposition - Ring1AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring1AxialMotorState = StepperMotor(stepstoangle, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin); //Motor will move
-Serial.println(Ring1AxialEncoderState); //Calls the new encoder count to print out
-
+int desiredposition = (30.679/.9); //determining the position in terms of steps
 int desiredpositoin2 = (8.52/.9); //determining the position in terms of steps
-stepstoangle2 = desiredposition2 - Ring2AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring2AxialMotorState = StepperMotor(stepstoangle2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
-Serial.println(Ring2AxialEncoderState); //Calls the new encoder count to print out
 
 // Now running the motors for the radial distances
-
 int intendedposition = 68800;
-stepstoradius = intendedposition - Ring1RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring1RadialMotorState = StepperMotor(stepstoradius, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move
-Serial.println(Ring1RadialEncoderState); //Calls the new encoder count to print out
-
 int intendedposition2 = 47072;
-stepstoradius2 = intendedposition2 - Ring2RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring2RadialMotorState = StepperMotor(stepstoradius2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move
-Serial.println(Ring2RadialEncoderState); //Calls the new encoder count to print out
-
     }
 
-  }
   else if (Frequency = 1125) {
-    void Movement() {
-
-    int desiredposition = (39.466/.9); //determining the position in terms of steps
-stepstoangle = desiredposition - Ring1AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring1AxialMotorState = StepperMotor(stepstoangle, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin); //Motor will move
-Serial.println(Ring1AxialEncoderState); //Calls the new encoder count to print out
-
+int desiredposition = (39.466/.9); //determining the position in terms of steps
 int desiredpositoin2 = (33.43/.9); //determining the position in terms of steps
-stepstoangle2 = desiredposition2 - Ring2AxialEncoderState; //determining how far the motor needs to move to the new position
-Ring2AxialMotorState = StepperMotor(stepstoangle2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
-Serial.println(Ring2AxialEncoderState); //Calls the new encoder count to print out
 
 // Now running the motors for the radial distances
-
 int intendedposition = 76800;
-stepstoradius = intendedposition - Ring1RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring1RadialMotorState = StepperMotor(stepstoradius, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move
-Serial.println(Ring1RadialEncoderState); //Calls the new encoder count to print out
-
 int intendedposition2 = 54128;
-stepstoradius2 = intendedposition2 - Ring2RadialEncoderState; //Determining how far the motor needs to move to the new position
-Ring2RadialMotorState = StepperMotor(stepstoradius2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move
-Serial.println(Ring2RadialEncoderState); //Calls the new encoder count to print out
-
     }
-
-  }
   else {
     Serial.println("Error! You did not enter a valid frequency"); //If they do not enter one of the 7 frequencies it will not move
   }
+  
+  int x = 0;
+while(x==0){
+  int Direction;
+if (abs(desiredposition - Ring1AxialEncoderCounter) > 2){
+  if (desiredposition - Ring1AxialEncoderCounter > 0){
+    Direction = 1;
+  }
+  else{
+    Direction = -1;
+  }
+  Ring1AxialMotorState = StepperMotor(Direction, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin);
+}
 
+if (abs(desiredposition - Ring2AxialEncoderCounter) > 2){
+  if (desiredposition2 - Ring2AxialEncoderCounter > 0){
+    Direction = 1;
+  }
+  else{
+    Direction = -1;
+  }
+Ring2AxialMotorState = StepperMotor(Direction, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
+}
+
+if (abs(intendedposition - Ring1RadialEncoderCounter) > 2){
+  if (intendedposition - Ring1RadialEncoderCounter > 0){
+    Direction = 10;
+  }
+  else{
+    Direction = -10;
+  }
+Ring1RadialMotorState = StepperMotor(Direction, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move  
+}
+
+if (abs(intendedposition - Ring2RadialEncoderCounter) > 2){
+  if (intendedposition - Ring2RadialEncoderCounter > 0){
+    Direction = 10;
+  }
+  else{
+    Direction = -10;
+  }
+Ring2RadialMotorState = StepperMotor(Direction, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move  
+}
+//if all encoders are within 2 steps of the desired position, end
+if (abs(desiredposition - Ring1AxialEncoderCounter) <= 2 && abs(desiredposition - Ring2AxialEncoderCounter) <= 2
+&& abs(desiredposition - Ring1RadialEncoderCounter) <= 2 && abs(desiredposition - Ring2RadialEncoderCounter) <= 2){
+  x=1;
+}
+}
+}
 
 //StartUp function, this zeros the array and encoders
 void StartUp (){
@@ -505,6 +433,5 @@ void StartUp (){
 }
 
 void loop() {
-
-  Ring1AxialMotorState = StepperMotor (-100, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin );
+ExecuteSteps();
 }
