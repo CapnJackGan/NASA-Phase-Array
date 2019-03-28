@@ -1,5 +1,5 @@
-//This code is written for the Arduino IDE
-//The purpose of this code is to take a user defined polar coordinate and reconfigure an array to match those coordinates
+//This code is written for the Arduino MEGA
+//The purpose of this code is to take a user defined polar coordinate or preset and reconfigure an array to match those coordinates
 /*Notable functions:
    MotorState = StepperMotor (int StepCount, char MotorState, int LP, int DP )
    MotorState are listed in variable
@@ -24,6 +24,8 @@
    -Run to positions/control loop
 -StartUp Function
 */
+
+//Serial communications: Baud rate = 9600
 
 //Variables
 int Ring1RadialEncoderCounter = 100000; //counter to keep track of encoder position. Initially set high for startup sequence
