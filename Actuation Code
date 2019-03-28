@@ -8,6 +8,23 @@
    DP is the Data Pin, see pinout chart
 */
 
+/*Code Structure:
+-Variables
+-Pinouts
+-Setup
+   -Pin Setup
+   -Initiate Interupts
+   -Serial Setup
+   -Call StartUp
+-Interupt Functions
+-Define Interupt Function
+-StepperMotor Function
+-ExecuteSteps Function
+   -Frequency Presets
+   -Run to positions/control loop
+-StartUp Function
+*/
+
 //Variables
 int Ring1RadialEncoderCounter = 100000; //counter to keep track of encoder position. Initially set high for startup sequence
 int Ring1AxialEncoderCounter = 10000;
@@ -267,6 +284,7 @@ char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) 
 //The following is how far the motors need to move to get to their intended position
 void ExecuteSteps(){
   Serial.println("Please enter your desired frequency");
+  Serial.println("Available presets: 1125, 1800, 2825, 4500, 7150, 11250, 16000");
   int Frequency;
   if (Serial.available() > 0) {
     // read the incoming byte:
