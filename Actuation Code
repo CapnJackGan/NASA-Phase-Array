@@ -25,17 +25,19 @@
 -StartUp Function
 */
 
-//Serial communications: Baud rate = 9600
+//Serial communications: Baud rate = 250000
 
-//Variables
-int Ring1RadialEncoderCounter = 100000; //counter to keep track of encoder position. Initially set high for startup sequence
-int Ring1AxialEncoderCounter = 10000;
-int Ring2RadialEncoderCounter = 100000;
-int Ring2AxialEncoderCounter = 10000;
-char Ring1RadialEncoderState = 'A'; //Encoder states
-char Ring1AxialEncoderState = 'A';
-char Ring2RadialEncoderState = 'A';
-char Ring2AxialEncoderState = 'A';
+struct Encoder {
+  long Counter;
+  char State;
+};
+
+//Variablescoder states
+
+Encoder Radial1 = {10000, 'A'};
+Encoder Radial2 = {10000, 'A'};
+Encoder Axial1 = {10000, 'A'};
+Encoder Axial2 = {10000, 'A'};
 char Ring1RadialMotorState = 'A'; //Motor step states
 char Ring1AxialMotorState = 'A';
 char Ring2RadialMotorState = 'A';
@@ -100,47 +102,55 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelB), Ring2AxialEncoderBInterrupt, CHANGE);
 
   //Iniatiate serial port
-  Serial.begin(9600);
+  Serial.begin(250000);
 
 //Launch Startup Sequence
   StartUp();
 }
 
 //Encoder interupts
-void Ring1RadialEncoderAInterrupt() {
-  EncoderInterupt(Ring1RadialEncoderState, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Ring1RadialEncoderCounter);
+Encoder Ring1RadialEncoderAInterrupt() {
+  Radial1 = EncoderInterupt(Radial1.State, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Radial1.Counter);
+  return Radial1;
 }
 
-void Ring1RadialEncoderBInterrupt() {
-  EncoderInterupt(Ring1RadialEncoderState, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Ring1RadialEncoderCounter);
+Encoder Ring1RadialEncoderBInterrupt() { 
+  Radial1 = EncoderInterupt(Radial1.State, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Radial1.Counter);
+  return Radial1;
 }
 
-void Ring1AxialEncoderAInterrupt() {
-  EncoderInterupt(Ring1AxialEncoderState, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Ring1AxialEncoderCounter);
+Encoder Ring1AxialEncoderAInterrupt() {
+  Axial1 = EncoderInterupt(Axial1.State, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Axial1.Counter);
+  return Axial1;
 }
 
-void Ring1AxialEncoderBInterrupt() {
-  EncoderInterupt(Ring1AxialEncoderState, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Ring1AxialEncoderCounter);
+Encoder Ring1AxialEncoderBInterrupt() {
+  Axial1 = EncoderInterupt(Axial1.State, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Axial1.Counter);
+  return Axial1;
 }
+
 //Ring 2 interupts
-void Ring2RadialEncoderAInterrupt() {
-  EncoderInterupt(Ring2RadialEncoderState, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Ring2RadialEncoderCounter);
+Encoder Ring2RadialEncoderAInterrupt() {
+  Radial2 = EncoderInterupt(Radial2.State, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Radial2.Counter);
+  return Radial1;
 }
 
-void Ring2RadialEncoderBInterrupt() {
-  EncoderInterupt(Ring2RadialEncoderState, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Ring2RadialEncoderCounter);
+Encoder Ring2RadialEncoderBInterrupt() { 
+  Radial2 = EncoderInterupt(Radial2.State, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Radial2.Counter);
+  return Radial2;
 }
 
-void Ring2AxialEncoderAInterrupt() {
-  EncoderInterupt(Ring2AxialEncoderState, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Ring2AxialEncoderCounter);
+Encoder Ring2AxialEncoderAInterrupt() {
+  Axial2 = EncoderInterupt(Axial2.State, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Axial2.Counter);
+  return Axial2;
 }
 
-void Ring2AxialEncoderBInterrupt() {
-  EncoderInterupt(Ring2AxialEncoderState, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Ring2AxialEncoderCounter);
+Encoder Ring2AxialEncoderBInterrupt() {
+  Axial1 = EncoderInterupt(Axial2.State, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Axial2.Counter);
+  return Axial2;
 }
 
-//Encoder interupt function
-void EncoderInterupt(char State, int ChannelA, int ChannelB, int EncoderCounter) {
+Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCounter) {
   char Previous = State;
   int A = digitalRead(ChannelA);
   int B = digitalRead(ChannelB);
@@ -149,47 +159,49 @@ void EncoderInterupt(char State, int ChannelA, int ChannelB, int EncoderCounter)
     State = 'A';
   }
   else if (A == HIGH && B == LOW) {
-    State = 'B';
+    State = 'D';
   }
   else if (A == LOW && B == HIGH) {
-    State = 'C';
+    State = 'B';
   }
   else {
-    State = 'D';
+    State = 'C';
   }
   //Finds encoder direction using encoder states
   if (Previous == 'A') {
     if (State == 'B') {
       EncoderCounter++;
     }
-    else if (State == 'C') {
+    else if (State == 'D') {
       EncoderCounter--;
     }
   }
-  if (Previous == 'B') {
-    if (State == 'D') {
+  else if (Previous == 'B') {
+    if (State == 'C') {
       EncoderCounter++;
     }
     else if (State == 'A') {
       EncoderCounter--;
     }
   }
-  if (Previous == 'C') {
-    if (State == 'A') {
+  else if (Previous == 'C') {
+    if (State == 'D') {
       EncoderCounter++;
-    }
-    else if (State == 'D') {
-      EncoderCounter--;
-    }
-  }
-  if (Previous == 'D') {
-    if (State == 'C') {
-     EncoderCounter++;
     }
     else if (State == 'B') {
       EncoderCounter--;
     }
   }
+  else if (Previous == 'D') {
+    if (State == 'A') {
+     EncoderCounter++;
+    }
+    else if (State == 'C') {
+      EncoderCounter--;
+    }
+  }
+  Encoder Temp{EncoderCounter, State};
+  return Temp;
 }
 
 //This function runs the motor
