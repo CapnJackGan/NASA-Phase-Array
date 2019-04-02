@@ -379,8 +379,8 @@ int intendedposition2 = 54128;
   int x = 0;
 while(x==0){
   int Direction;
-if (abs(desiredposition - Ring1AxialEncoderCounter) > 2){
-  if (desiredposition - Ring1AxialEncoderCounter > 0){
+if (abs(desiredposition - Axial1.Counter) > 2){
+  if (desiredposition - Axial1.Counter > 0){
     Direction = 1;
   }
   else{
@@ -389,8 +389,8 @@ if (abs(desiredposition - Ring1AxialEncoderCounter) > 2){
   Ring1AxialMotorState = StepperMotor(Direction, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin);
 }
 
-if (abs(desiredposition - Ring2AxialEncoderCounter) > 2){
-  if (desiredposition2 - Ring2AxialEncoderCounter > 0){
+if (abs(desiredposition - Axial2.Counter) > 2){
+  if (desiredposition2 - Axial2.Counter > 0){
     Direction = 1;
   }
   else{
@@ -399,8 +399,8 @@ if (abs(desiredposition - Ring2AxialEncoderCounter) > 2){
 Ring2AxialMotorState = StepperMotor(Direction, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
 }
 
-if (abs(intendedposition - Ring1RadialEncoderCounter) > 2){
-  if (intendedposition - Ring1RadialEncoderCounter > 0){
+if (abs(intendedposition - Radial1.Counter) > 2){
+  if (intendedposition - Radial1.Counter > 0){
     Direction = 10;
   }
   else{
@@ -409,8 +409,8 @@ if (abs(intendedposition - Ring1RadialEncoderCounter) > 2){
 Ring1RadialMotorState = StepperMotor(Direction, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move  
 }
 
-if (abs(intendedposition - Ring2RadialEncoderCounter) > 2){
-  if (intendedposition - Ring2RadialEncoderCounter > 0){
+if (abs(intendedposition - Radial2.Counter) > 2){
+  if (intendedposition - Radial2.Counter > 0){
     Direction = 10;
   }
   else{
@@ -419,8 +419,8 @@ if (abs(intendedposition - Ring2RadialEncoderCounter) > 2){
 Ring2RadialMotorState = StepperMotor(Direction, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move  
 }
 //if all encoders are within 2 steps of the desired position, end
-if (abs(desiredposition - Ring1AxialEncoderCounter) <= 2 && abs(desiredposition - Ring2AxialEncoderCounter) <= 2
-&& abs(desiredposition - Ring1RadialEncoderCounter) <= 2 && abs(desiredposition - Ring2RadialEncoderCounter) <= 2){
+if (abs(desiredposition - Axial1.Counter) <= 2 && abs(desiredposition - Axial2.Counter) <= 2
+&& abs(desiredposition - Radial1.Counter) <= 2 && abs(desiredposition - Radial2.Counter) <= 2){
   x=1;
 }
 }
@@ -428,37 +428,37 @@ if (abs(desiredposition - Ring1AxialEncoderCounter) <= 2 && abs(desiredposition 
 
 //StartUp function, this zeros the array and encoders
 void StartUp (){
-  while( Ring1RadialEncoderCounter && Ring1AxialEncoderCounter && Ring1RadialEncoderCounter && Ring1AxialEncoderCounter != 0){
+  while( Radial1.Counter && Axial1.Counter && Radial1.Counter && Axial1.Counter != 0){
     
-  int PrevRing1RadialEncoderCounter = Ring1RadialEncoderCounter;
-  if (Ring1RadialEncoderCounter != 0){
+  int PrevRadial1Counter = Radial1.Counter;
+  if (Radial1.Counter != 0){
   Ring1RadialMotorState = StepperMotor (-2, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin );
-  if (PrevRing1RadialEncoderCounter-Ring1RadialEncoderCounter >=1){
-    Ring1RadialEncoderCounter=0;
+  if (PrevRadial1Counter-Radial1.Counter >=1){
+    Radial1.Counter=0;
   }
 }
 
-  int PrevRing1AxialEncoderCounter = Ring1AxialEncoderCounter;
-  if (Ring1AxialEncoderCounter != 0){
+  int PrevAxial1Counter = Axial1.Counter;
+  if (Axial1.Counter != 0){
   Ring1AxialMotorState = StepperMotor (-2, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin );
-  if (PrevRing1AxialEncoderCounter-Ring1AxialEncoderCounter >=1){
-    Ring1AxialEncoderCounter=0;
+  if (PrevAxial1Counter-Axial1.Counter >=1){
+    Axial1.Counter=0;
   }
 }
 
-  int PrevRing2RadialEncoderCounter = Ring2RadialEncoderCounter;
-  if (Ring2RadialEncoderCounter != 0){
+  int PrevRadial2Counter = Radial2.Counter;
+  if (Radial2.Counter != 0){
   Ring2RadialMotorState = StepperMotor (-2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin );
-  if (PrevRing2RadialEncoderCounter-Ring2RadialEncoderCounter >=1){
-    Ring2RadialEncoderCounter=0;
+  if (PrevRadial2Counter-Radial2.Counter >=1){
+    Radial2.Counter=0;
   }
 }
 
-  int PrevRing2AxialEncoderCounter = Ring2AxialEncoderCounter;
-  if (Ring2AxialEncoderCounter != 0){
+  int PrevAxial2Counter = Axial2.Counter;
+  if (Axial2.Counter != 0){
   Ring2AxialMotorState = StepperMotor (-2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin );
-  if (PrevRing2AxialEncoderCounter-Ring2AxialEncoderCounter >=1){
-    Ring2AxialEncoderCounter=0;
+  if (PrevAxial2Counter-Axial2.Counter >=1){
+    Axial2.Counter=0;
   }
 }
   }
