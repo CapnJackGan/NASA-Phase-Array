@@ -311,66 +311,66 @@ int intendedposition2;
 
 if (Frequency = 16000 ) {  
 //Running motors for axial locations
-int desiredposition = (5.6/.9); //determining the position in terms of steps
-int desiredposition2 = (24.7/.9); //determining the position in terms of steps
+int desiredposition = (25); //determining the position in terms of steps
+int desiredposition2 = (110); //determining the position in terms of steps
 
 // Now running the motors for the radial distances
-int intendedposition = 28800;
-int intendedposition2 = 11760;
+int intendedposition = 115200;
+int intendedposition2 = 47040;
 }
 
 else if (Frequency = 11250) {
-int desiredposition = (18.32/.9); //determining the position in terms of steps
-int desiredpositoin2 = (10.6/.9); //determining the position in terms of steps
+int desiredposition = (81); //determining the position in terms of steps
+int desiredpositoin2 = (47); //determining the position in terms of steps
 
 // Now running the motors for the radial distances
-int intendedposition = 36800;
-int intendedposition2 = 18880;
+int intendedposition = 147200;
+int intendedposition2 = 75520;
 }
 
 else if (Frequency = 7150) {
-int desiredposition = (23.07/.9); //determining the position in terms of steps
-int desiredpositoin2 = (17.45/.9); //determining the position in terms of steps
+int desiredposition = (103); //determining the position in terms of steps
+int desiredpositoin2 = (78); //determining the position in terms of steps
 
 // Now running the motors for the radial distances
-int intendedposition = 44800;
-int intendedposition2 = 25920;
+int intendedposition = 179200;
+int intendedposition2 = 103680;
     }
     
   else if (Frequency = 4500) {
-int desiredposition = (33.348/.9); //determining the position in terms of steps
-int desiredpositoin2 = (20.88/.9); //determining the position in terms of steps
+int desiredposition = (148); //determining the position in terms of steps
+int desiredpositoin2 = (93); //determining the position in terms of steps
 
 // Now running the motors for the radial distances
-int intendedposition = 52800;
-int intendedposition2 = 32962;
+int intendedposition = 211200;
+int intendedposition2 = 131848;
     }
     
   else if (Frequency = 2825) {
-int desiredposition = (37.965/.9); //determining the position in terms of steps
-int desiredpositoin2 = (25.495/.9); //determining the position in terms of steps
+int desiredposition = (169); //determining the position in terms of steps
+int desiredpositoin2 = (113); //determining the position in terms of steps
 
 // Now running the motors for the radial distances
-int intendedposition = 60800;
-int intendedposition2 = 40017;
+int intendedposition = 243200;
+int intendedposition2 = 160068;
     }
 
   else if (Frequency = 1800) {
-int desiredposition = (30.679/.9); //determining the position in terms of steps
-int desiredpositoin2 = (8.52/.9); //determining the position in terms of steps
+int desiredposition = (136); //determining the position in terms of steps
+int desiredpositoin2 = (38); //determining the position in terms of steps
 
 // Now running the motors for the radial distances
-int intendedposition = 68800;
-int intendedposition2 = 47072;
+int intendedposition = 275200;
+int intendedposition2 = 188288;
     }
 
   else if (Frequency = 1125) {
-int desiredposition = (39.466/.9); //determining the position in terms of steps
-int desiredpositoin2 = (33.43/.9); //determining the position in terms of steps
+int desiredposition = (175); //determining the position in terms of steps
+int desiredpositoin2 = (149); //determining the position in terms of steps
 
 // Now running the motors for the radial distances
-int intendedposition = 76800;
-int intendedposition2 = 54128;
+int intendedposition = 307200;
+int intendedposition2 = 216512;
     }
   else {
     Serial.println("Error! You did not enter a valid frequency"); //If they do not enter one of the 7 frequencies it will not move
