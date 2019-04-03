@@ -1,12 +1,10 @@
 //This code is written for the Arduino MEGA
 //The purpose of this code is to take a user defined polar coordinate or preset and reconfigure an array to match those coordinates
 /*Notable functions:
-   MotorState = StepperMotor (int StepCount, char MotorState, int LP, int DP )
-   MotorState are listed in variable
-   StepCount is the number of steps in 0.9° increments due to half stepping
-   LP is the Latch Pin, see pinout chart
-   DP is the Data Pin, see pinout chart
+StepperMotor (int StepCount, const int dirPin, const int stepPin )
+see Pinout chart for pins
 */
+int DELAY=1000; //delay between steps in miliseconds
 
 /*Code Structure:
 -Variables
@@ -32,64 +30,49 @@ struct Encoder {
   char State;
 };
 
-//Variablescoder states
-
+//Variable encoder states
 Encoder Radial1 = {10000, 'A'};
 Encoder Radial2 = {10000, 'A'};
 Encoder Axial1 = {10000, 'A'};
 Encoder Axial2 = {10000, 'A'};
-char Ring1RadialMotorState = 'A'; //Motor step states
-char Ring1AxialMotorState = 'A';
-char Ring2RadialMotorState = 'A';
-char Ring2AxialMotorState = 'A';
 
 //Set Pins, see pinout chart
 //For shift registers, Data to pin 14 SER, PMW to 11 SRCLK, Latch 12 RCLK, pull pin 16 and 10 high and ground pin 8 and 13
-const int Ring1RadialMotorLatchPin = 2; //Ring 1 Radial
-const int Ring1RadialMotorDataPin = 3;
-const int PWM = 4;
-const int Ring1AxialMotorLatchPin = 6; //Ring 1 Axial
-const int Ring1AxialMotorDataPin = 7;
-const int Ring1RadialEncoderChannelA = 8;
-const int Ring1RadialEncoderChannelB = 9;
-const int Ring1RadialEncoderIndex = 10;
-const int Ring1AxialEncoderChannelA = 11;
-const int Ring1AxialEncoderChannelB = 12;
-const int Ring1AxialEncoderIndex = 13;
-const int Ring2RadialMotorLatchPin = 22; //Ring 2 Radial
-const int Ring2RadialMotorDataPin = 23;
-const int Ring2AxialMotorLatchPin = 24; //Ring 2 Axial
-const int Ring2AxialMotorDataPin = 25;
-const int Ring2RadialEncoderChannelA = 26;
-const int Ring2RadialEncoderChannelB = 27;
-const int Ring2RadialEncoderIndex = 28;
-const int Ring2AxialEncoderChannelA = 29;
-const int Ring2AxialEncoderChannelB = 30;
-const int Ring2AxialEncoderIndex = 31;
+const int Ring1RadialSteps = 2; //Ring 1 Radial
+const int Ring1RadialDir = 3;
+const int Ring1RadialEncoderChannelA = 4;
+const int Ring1RadialEncoderChannelB = 5;
+const int Ring1AxialSteps = 6; //Ring 1 Axial
+const int Ring1AxialDir = 7;
+const int Ring1AxialEncoderChannelA = 8;
+const int Ring1AxialEncoderChannelB = 9;
+const int Ring2RadialSteps = 10; //Ring 2 Radial
+const int Ring2RadialDir = 11;
+const int Ring2RadialEncoderChannelA = 12;
+const int Ring2RadialEncoderChannelB = 13;
+const int Ring2AxialSteps = 14; //Ring 2 Axial
+const int Ring2AxialDir = 15;
+const int Ring2AxialEncoderChannelA = 16;
+const int Ring2AxialEncoderChannelB = 17;
 
 void setup() {
   //configure pins to input or output
-  pinMode(PWM, OUTPUT);
-  pinMode(Ring1RadialMotorLatchPin, OUTPUT);
-  pinMode(Ring1RadialMotorDataPin, OUTPUT);
-  pinMode(Ring1AxialMotorLatchPin, OUTPUT);
-  pinMode(Ring1AxialMotorDataPin, OUTPUT);
+  pinMode(Ring1RadialSteps, OUTPUT);
+  pinMode(Ring1RadialDir, OUTPUT);
+  pinMode(Ring1AxialSteps, OUTPUT);
+  pinMode(Ring1AxialDir, OUTPUT);
   pinMode(Ring1RadialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring1RadialEncoderChannelB, INPUT_PULLUP);
-  pinMode(Ring1RadialEncoderIndex, INPUT_PULLUP);
   pinMode(Ring1AxialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring1AxialEncoderChannelB, INPUT_PULLUP);
-  pinMode(Ring1AxialEncoderIndex, INPUT_PULLUP);
-  pinMode(Ring2RadialMotorLatchPin, OUTPUT);
-  pinMode(Ring2RadialMotorDataPin, OUTPUT);
-  pinMode(Ring2AxialMotorLatchPin, OUTPUT);
-  pinMode(Ring2AxialMotorDataPin, OUTPUT);
+  pinMode(Ring2RadialSteps, OUTPUT);
+  pinMode(Ring2RadialDir, OUTPUT);
+  pinMode(Ring2AxialSteps, OUTPUT);
+  pinMode(Ring2AxialDir, OUTPUT);
   pinMode(Ring2RadialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring2RadialEncoderChannelB, INPUT_PULLUP);
-  pinMode(Ring2RadialEncoderIndex, INPUT_PULLUP);
   pinMode(Ring2AxialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring2AxialEncoderChannelB, INPUT_PULLUP);
-  pinMode(Ring2AxialEncoderIndex, INPUT_PULLUP);
   
   //initiate encoder interupts
   attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelA), Ring1RadialEncoderAInterrupt, CHANGE);
@@ -205,94 +188,21 @@ Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCoun
 }
 
 //This function runs the motor
-char StepperMotor (int StepCount, char MotorState, const int LP, const int DP ) {
-  
-  byte data;
-
+void StepperMotor (int StepCount, const int dirPin, const int stepPin ) {
   if (StepCount > 0) {
-    for (int i = 0; i <= StepCount; i++) {
-      //implement state machine here
-      if (MotorState == 'A') {
-        data = 0b00000110;
-        MotorState = 'B';
+    digitalWrite(dirPin,HIGH); // Enables the motor to move in a particular direction
       }
-      else if (MotorState == 'B') {
-        data = 0b00000100;
-        MotorState = 'C';
-      }
-      else if (MotorState == 'C') {
-        data = 0b00001100;
-        MotorState = 'D';
-      }
-      else if (MotorState == 'D') {
-        data = 0b00001000;
-        MotorState = 'E';
-      }
-      else if (MotorState == 'E') {
-        data = 0b00011000;
-        MotorState = 'F';
-      }
-      else if (MotorState == 'F') {
-        data = 0b00010000;
-        MotorState = 'G';
-      }
-      else if (MotorState == 'G') {
-        data = 0b00010010;
-        MotorState = 'H';
-      }
-      else if (MotorState == 'H') {
-        data = 0b00000010;
-        MotorState = 'A';
-      }
-      digitalWrite(LP, LOW);
-      shiftOut(DP, 4, MSBFIRST, data);//4 is the PWM pin
-      digitalWrite (LP, HIGH);
-      delay(20);//delay used so motor doesn't try to spin impossibly fast, specific number needs fine tuning
-    }
-  }
   else if (StepCount < 0) {
-    while (StepCount != 0) {
-      //implement state machine here but reversed
-      if (MotorState == 'H') {
-        data = 0b00010000;
-        MotorState = 'G';
+    digitalWrite(dirPin,HIGH); // Enables the motor to move in a particular direction
       }
-      else if (MotorState == 'G') {
-        data = 0b00011000;
-        MotorState = 'F';
-      }
-      else if (MotorState == 'F') {
-        data = 0b00001000;
-        MotorState = 'E';
-      }
-      else if (MotorState == 'E') {
-        data = 0b00001100;
-        MotorState = 'D';
-      }
-      else if (MotorState == 'D') {
-        data = 0b00000100;
-        MotorState = 'C';
-      }
-      else if (MotorState == 'C') {
-        data = 0b00000110;
-        MotorState = 'B';
-      }
-      else if (MotorState == 'B') {
-        data = 0b00000010;
-        MotorState = 'A';
-      }
-      else if (MotorState == 'A') {
-        data = 0b00010010;
-        MotorState = 'H';
-      }
-      StepCount++;
-      digitalWrite(LP, LOW);
-      shiftOut(DP, 4, MSBFIRST, data); //4 is the PWM pin
-      digitalWrite (LP, HIGH);
-      delay(20);//delay used so motor doesn't try to spin impossibly fast
+ // Makes 200 pulses for making one full cycle rotation
+ StepCount = abs(StepCount);
+    for(int x = 0; x < StepCount; x++) {
+        digitalWrite(stepPin,HIGH);
+        delayMicroseconds(DELAY);
+        digitalWrite(stepPin,LOW);
+        delayMicroseconds(DELAY);
     }
-  }
-  return MotorState;
 }
 
 //The following is how far the motors need to move to get to their intended position
@@ -386,7 +296,7 @@ if (abs(desiredposition - Axial1.Counter) > 2){
   else{
     Direction = -1;
   }
-  Ring1AxialMotorState = StepperMotor(Direction, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin);
+  StepperMotor(Direction, Ring1AxialDir, Ring1AxialSteps);
 }
 
 if (abs(desiredposition - Axial2.Counter) > 2){
@@ -396,7 +306,7 @@ if (abs(desiredposition - Axial2.Counter) > 2){
   else{
     Direction = -1;
   }
-Ring2AxialMotorState = StepperMotor(Direction, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin); //Motor will move
+  StepperMotor(Direction, Ring2AxialDir, Ring2AxialSteps); //Motor will move
 }
 
 if (abs(intendedposition - Radial1.Counter) > 2){
@@ -406,7 +316,7 @@ if (abs(intendedposition - Radial1.Counter) > 2){
   else{
     Direction = -10;
   }
-Ring1RadialMotorState = StepperMotor(Direction, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin); //Motor Will move  
+StepperMotor(Direction, Ring1RadialDir, Ring1RadialSteps); //Motor Will move  
 }
 
 if (abs(intendedposition - Radial2.Counter) > 2){
@@ -416,7 +326,7 @@ if (abs(intendedposition - Radial2.Counter) > 2){
   else{
     Direction = -10;
   }
-Ring2RadialMotorState = StepperMotor(Direction, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin); //Motor will move  
+  StepperMotor(Direction, Ring2RadialDir, Ring2RadialSteps); //Motor will move  
 }
 //if all encoders are within 2 steps of the desired position, end
 if (abs(desiredposition - Axial1.Counter) <= 2 && abs(desiredposition - Axial2.Counter) <= 2
@@ -432,7 +342,7 @@ void StartUp (){
     
   int PrevRadial1Counter = Radial1.Counter;
   if (Radial1.Counter != 0){
-  Ring1RadialMotorState = StepperMotor (-2, Ring1RadialMotorState, Ring1RadialMotorLatchPin, Ring1RadialMotorDataPin );
+  StepperMotor (-2, Ring1RadialDir, Ring1RadialSteps );
   if (PrevRadial1Counter-Radial1.Counter >=1){
     Radial1.Counter=0;
   }
@@ -440,7 +350,7 @@ void StartUp (){
 
   int PrevAxial1Counter = Axial1.Counter;
   if (Axial1.Counter != 0){
-  Ring1AxialMotorState = StepperMotor (-2, Ring1AxialMotorState, Ring1AxialMotorLatchPin, Ring1AxialMotorDataPin );
+  StepperMotor (-2, Ring1RadialDir, Ring1RadialSteps );
   if (PrevAxial1Counter-Axial1.Counter >=1){
     Axial1.Counter=0;
   }
@@ -448,7 +358,7 @@ void StartUp (){
 
   int PrevRadial2Counter = Radial2.Counter;
   if (Radial2.Counter != 0){
-  Ring2RadialMotorState = StepperMotor (-2, Ring2RadialMotorState, Ring2RadialMotorLatchPin, Ring2RadialMotorDataPin );
+  StepperMotor (-2, Ring2RadialDir, Ring2RadialSteps );
   if (PrevRadial2Counter-Radial2.Counter >=1){
     Radial2.Counter=0;
   }
@@ -456,7 +366,7 @@ void StartUp (){
 
   int PrevAxial2Counter = Axial2.Counter;
   if (Axial2.Counter != 0){
-  Ring2AxialMotorState = StepperMotor (-2, Ring2AxialMotorState, Ring2AxialMotorLatchPin, Ring2AxialMotorDataPin );
+  StepperMotor (-2, Ring2RadialDir, Ring2RadialSteps );
   if (PrevAxial2Counter-Axial2.Counter >=1){
     Axial2.Counter=0;
   }
