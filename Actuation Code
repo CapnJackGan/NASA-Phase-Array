@@ -199,9 +199,9 @@ void StepperMotor (int StepCount, const int dirPin, const int stepPin ) {
  StepCount = abs(StepCount);
     for(int x = 0; x < StepCount; x++) {
         digitalWrite(stepPin,HIGH);
-        delayMicroseconds(DELAY);
+        delay(DELAY);
         digitalWrite(stepPin,LOW);
-        delayMicroseconds(DELAY);
+        delay(DELAY);
     }
 }
 
