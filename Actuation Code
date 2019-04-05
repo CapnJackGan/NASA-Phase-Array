@@ -214,99 +214,21 @@ int intendedposition2;
   int Choose;
     if (Serial.available() > 0) {
     // read the incoming byte:
-    Choose = Serial.read();
+    desiredposition = Serial.read();
   }
-  if (Choose == 1){
-  int Frequency;
-  if (Serial.available() > 0) {
+      if (Serial.available() > 0) {
     // read the incoming byte:
-    Frequency = Serial.read();
+    desiredposition2 = Serial.read();
   }
-
-if (Frequency = 16000 ) {  
-//Running motors for axial locations
-int desiredposition = (25); //determining the position in terms of steps
-int desiredposition2 = (110); //determining the position in terms of steps
-
-// Now running the motors for the radial distances
-int intendedposition = 115200;
-int intendedposition2 = 47040;
-}
-
-else if (Frequency = 11250) {
-int desiredposition = (81); //determining the position in terms of steps
-int desiredpositoin2 = (47); //determining the position in terms of steps
-
-// Now running the motors for the radial distances
-int intendedposition = 147200;
-int intendedposition2 = 75520;
-}
-
-else if (Frequency = 7150) {
-int desiredposition = (103); //determining the position in terms of steps
-int desiredpositoin2 = (78); //determining the position in terms of steps
-
-// Now running the motors for the radial distances
-int intendedposition = 179200;
-int intendedposition2 = 103680;
-    }
-    
-  else if (Frequency = 4500) {
-int desiredposition = (148); //determining the position in terms of steps
-int desiredpositoin2 = (93); //determining the position in terms of steps
-
-// Now running the motors for the radial distances
-int intendedposition = 211200;
-int intendedposition2 = 131848;
-    }
-    
-  else if (Frequency = 2825) {
-int desiredposition = (169); //determining the position in terms of steps
-int desiredpositoin2 = (113); //determining the position in terms of steps
-
-// Now running the motors for the radial distances
-int intendedposition = 243200;
-int intendedposition2 = 160068;
-    }
-
-  else if (Frequency = 1800) {
-int desiredposition = (136); //determining the position in terms of steps
-int desiredpositoin2 = (38); //determining the position in terms of steps
-
-// Now running the motors for the radial distances
-int intendedposition = 275200;
-int intendedposition2 = 188288;
-    }
-
-  else if (Frequency = 1125) {
-int desiredposition = (175); //determining the position in terms of steps
-int desiredpositoin2 = (149); //determining the position in terms of steps
-
-// Now running the motors for the radial distances
-int intendedposition = 307200;
-int intendedposition2 = 216512;
-    }
-  }
-  else if (Choose == 2){
-  int Positions[4];
-  for (int i = 0; i <= 4; i++) {
-  if (Serial.available() > 0) {
+      if (Serial.available() > 0) {
     // read the incoming byte:
-    Positions[i] = Serial.read();
+    intendedposition = Serial.read();
   }
+      if (Serial.available() > 0) {
+    // read the incoming byte:
+    intendedposition2 = Serial.read();
   }
-  //DOTO add conversions
-int desiredposition = Positions[0];
-int desiredpositoin2 = Positions[2];
 
-// Now running the motors for the radial distances
-int intendedposition = Positions[1];
-int intendedposition2 = Positions[3];
-  }
-  else {
-    Serial.println("Error! You did not enter a valid frequency"); //If they do not enter one of the 7 frequencies it will not move
-  }
-  
   int x = 0;
 while(x==0){
   int Direction;
@@ -353,6 +275,10 @@ if (abs(intendedposition - Radial2.Counter) > 2){
 if (abs(desiredposition - Axial1.Counter) <= 2 && abs(desiredposition - Axial2.Counter) <= 2
 && abs(desiredposition - Radial1.Counter) <= 2 && abs(desiredposition - Radial2.Counter) <= 2){
   x=1;
+    Serial.print(Radial1.Counter);
+    Serial.print(Axial1.Counter);
+    Serial.print(Radial2.Counter);
+    Serial.print(Axial2.Counter);
 }
 }
 }
