@@ -272,14 +272,14 @@ if (abs(intendedposition - Radial2.Counter) > 2){
   StepperMotor(Direction, Ring2RadialDir, Ring2RadialSteps); //Motor will move  
 }
 //if all encoders are within 2 steps of the desired position, end
-if (abs(desiredposition - Axial1.Counter) <= 2 && abs(desiredposition - Axial2.Counter) <= 2
-&& abs(desiredposition - Radial1.Counter) <= 2 && abs(desiredposition - Radial2.Counter) <= 2){
-  x=1;
-    Serial.print(Radial1.Counter);
-    Serial.print(Axial1.Counter);
-    Serial.print(Radial2.Counter);
-    Serial.print(Axial2.Counter);
-}
+//if (abs(desiredposition - Axial1.Counter) <= 2 && abs(desiredposition - Axial2.Counter) <= 2
+//&& abs(desiredposition - Radial1.Counter) <= 2 && abs(desiredposition - Radial2.Counter) <= 2){
+//  x=1;
+//    Serial.print(Radial1.Counter);
+//    Serial.print(Axial1.Counter);
+//    Serial.print(Radial2.Counter);
+//    Serial.print(Axial2.Counter);
+//}
 }
 }
 
