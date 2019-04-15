@@ -1,10 +1,10 @@
-//This code is written for the Arduino MEGA
+//This code is written for the Arduino DUE
 //The purpose of this code is to take a user defined polar coordinate or preset and reconfigure an array to match those coordinates
 /*Notable functions:
 StepperMotor (int StepCount, const int dirPin, const int stepPin )
 see Pinout chart for pins
 */
-int DELAY=1000; //delay between steps in miliseconds
+int DELAY=10; //delay between steps in miliseconds
 
 /*Code Structure:
 -Variables
@@ -31,106 +31,105 @@ struct Encoder {
 };
 
 //Variable encoder states
-Encoder Radial1 = {10000, 'A'};
-Encoder Radial2 = {10000, 'A'};
-Encoder Axial1 = {10000, 'A'};
-Encoder Axial2 = {10000, 'A'};
+Encoder Radial5 = {10000, 'A'};
+Encoder Radial6 = {10000, 'A'};
+Encoder Axial5 = {10000, 'A'};
+Encoder Axial6 = {10000, 'A'};
 
 //Set Pins, see pinout chart
-//For shift registers, Data to pin 14 SER, PMW to 11 SRCLK, Latch 12 RCLK, pull pin 16 and 10 high and ground pin 8 and 13
-const int Ring1RadialSteps = 2; //Ring 1 Radial
-const int Ring1RadialDir = 3;
-const int Ring1RadialEncoderChannelA = 4;
-const int Ring1RadialEncoderChannelB = 5;
-const int Ring1AxialSteps = 6; //Ring 1 Axial
-const int Ring1AxialDir = 7;
-const int Ring1AxialEncoderChannelA = 8;
-const int Ring1AxialEncoderChannelB = 9;
-const int Ring2RadialSteps = 10; //Ring 2 Radial
-const int Ring2RadialDir = 11;
-const int Ring2RadialEncoderChannelA = 12;
-const int Ring2RadialEncoderChannelB = 13;
-const int Ring2AxialSteps = 14; //Ring 2 Axial
-const int Ring2AxialDir = 15;
-const int Ring2AxialEncoderChannelA = 16;
-const int Ring2AxialEncoderChannelB = 17;
+const int Ring5RadialSteps = 52; //Ring 5 Radial
+const int Ring5RadialDir = 53;
+const int Ring5RadialSleep = 51;
+const int Ring5RadialEncoderChannelA = 1;
+const int Ring5RadialEncoderChannelB = 1;
+const int Ring5RadialEncoderChannelIndex = 1;
+const int Ring5AxialSteps = 42; //Ring 5 Axial
+const int Ring5AxialDir = 43;
+const int Ring5AxialSleep = 41;
+const int Ring5AxialEncoderChannelA = 1;
+const int Ring5AxialEncoderChannelB = 1;
+const int Ring5AxialEncoderChannelIndex = 1;
+const int Ring6RadialSteps = 12; //Ring 6 Radial
+const int Ring6RadialDir = 11;
+const int Ring6RadialSleep = 13;
+const int Ring6RadialEncoderChannelA = 1;
+const int Ring6RadialEncoderChannelB = 1;
+const int Ring6RadialEncoderChannelIndex = 1;
+const int Ring6AxialSteps = 3; //Ring 6 Axial
+const int Ring6AxialDir = 2;
+const int Ring6AxialSleep = 4;
+const int Ring6AxialEncoderChannelA = 1;
+const int Ring6AxialEncoderChannelB = 1;
+const int Ring6AxialEncoderChannelIndex = 1;
 
 void setup() {
   //configure pins to input or output
-  pinMode(Ring1RadialSteps, OUTPUT);
-  pinMode(Ring1RadialDir, OUTPUT);
-  pinMode(Ring1AxialSteps, OUTPUT);
-  pinMode(Ring1AxialDir, OUTPUT);
-  pinMode(Ring1RadialEncoderChannelA, INPUT_PULLUP);
-  pinMode(Ring1RadialEncoderChannelB, INPUT_PULLUP);
-  pinMode(Ring1AxialEncoderChannelA, INPUT_PULLUP);
-  pinMode(Ring1AxialEncoderChannelB, INPUT_PULLUP);
-  pinMode(Ring2RadialSteps, OUTPUT);
-  pinMode(Ring2RadialDir, OUTPUT);
-  pinMode(Ring2AxialSteps, OUTPUT);
-  pinMode(Ring2AxialDir, OUTPUT);
-  pinMode(Ring2RadialEncoderChannelA, INPUT_PULLUP);
-  pinMode(Ring2RadialEncoderChannelB, INPUT_PULLUP);
-  pinMode(Ring2AxialEncoderChannelA, INPUT_PULLUP);
-  pinMode(Ring2AxialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring5RadialSteps, OUTPUT);
+  pinMode(Ring5RadialDir, OUTPUT);
+  pinMode(Ring5AxialSteps, OUTPUT);
+  pinMode(Ring5AxialDir, OUTPUT);
+  pinMode(Ring5RadialEncoderChannelA, INPUT_PULLUP);
+  pinMode(Ring5RadialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring5AxialEncoderChannelA, INPUT_PULLUP);
+  pinMode(Ring5AxialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring6RadialSteps, OUTPUT);
+  pinMode(Ring6RadialDir, OUTPUT);
+  pinMode(Ring6AxialSteps, OUTPUT);
+  pinMode(Ring6AxialDir, OUTPUT);
+  pinMode(Ring6RadialEncoderChannelA, INPUT_PULLUP);
+  pinMode(Ring6RadialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring6AxialEncoderChannelA, INPUT_PULLUP);
+  pinMode(Ring6AxialEncoderChannelB, INPUT_PULLUP);
   
   //initiate encoder interupts
-  attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelA), Ring1RadialEncoderAInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring1RadialEncoderChannelB), Ring1RadialEncoderBInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelA), Ring1AxialEncoderAInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring1AxialEncoderChannelB), Ring1AxialEncoderBInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelA), Ring2RadialEncoderAInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring2RadialEncoderChannelB), Ring2RadialEncoderBInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelA), Ring2AxialEncoderAInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring2AxialEncoderChannelB), Ring2AxialEncoderBInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring5RadialEncoderChannelA), Ring5RadialEncoderAInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring5RadialEncoderChannelB), Ring5RadialEncoderBInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring5AxialEncoderChannelA), Ring5AxialEncoderAInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring5AxialEncoderChannelB), Ring5AxialEncoderBInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring6RadialEncoderChannelA), Ring6RadialEncoderAInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring6RadialEncoderChannelB), Ring6RadialEncoderBInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderChannelA), Ring6AxialEncoderAInterrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderChannelB), Ring6AxialEncoderBInterrupt, CHANGE);
 
   //Iniatiate serial port
   Serial.begin(250000);
 
 //Launch Startup Sequence
-  StartUp();
+  //StartUp();
 }
 
 //Encoder interupts
-Encoder Ring1RadialEncoderAInterrupt() {
-  Radial1 = EncoderInterupt(Radial1.State, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Radial1.Counter);
-  return Radial1;
+void Ring5RadialEncoderAInterrupt() {
+  Radial5 = EncoderInterupt(Radial5.State, Ring5RadialEncoderChannelA, Ring5RadialEncoderChannelB, Radial5.Counter);
 }
 
-Encoder Ring1RadialEncoderBInterrupt() { 
-  Radial1 = EncoderInterupt(Radial1.State, Ring1RadialEncoderChannelA, Ring1RadialEncoderChannelB, Radial1.Counter);
-  return Radial1;
+void Ring5RadialEncoderBInterrupt() { 
+  Radial5 = EncoderInterupt(Radial5.State, Ring5RadialEncoderChannelA, Ring5RadialEncoderChannelB, Radial5.Counter);
 }
 
-Encoder Ring1AxialEncoderAInterrupt() {
-  Axial1 = EncoderInterupt(Axial1.State, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Axial1.Counter);
-  return Axial1;
+void Ring5AxialEncoderAInterrupt() {
+  Axial5 = EncoderInterupt(Axial5.State, Ring5AxialEncoderChannelA, Ring5AxialEncoderChannelB, Axial5.Counter);
 }
 
-Encoder Ring1AxialEncoderBInterrupt() {
-  Axial1 = EncoderInterupt(Axial1.State, Ring1AxialEncoderChannelA, Ring1AxialEncoderChannelB, Axial1.Counter);
-  return Axial1;
+void Ring5AxialEncoderBInterrupt() {
+  Axial5 = EncoderInterupt(Axial5.State, Ring5AxialEncoderChannelA, Ring5AxialEncoderChannelB, Axial5.Counter);
 }
 
 //Ring 2 interupts
-Encoder Ring2RadialEncoderAInterrupt() {
-  Radial2 = EncoderInterupt(Radial2.State, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Radial2.Counter);
-  return Radial1;
+void Ring6RadialEncoderAInterrupt() {
+  Radial6 = EncoderInterupt(Radial6.State, Ring6RadialEncoderChannelA, Ring6RadialEncoderChannelB, Radial6.Counter);
 }
 
-Encoder Ring2RadialEncoderBInterrupt() { 
-  Radial2 = EncoderInterupt(Radial2.State, Ring2RadialEncoderChannelA, Ring2RadialEncoderChannelB, Radial2.Counter);
-  return Radial2;
+void Ring6RadialEncoderBInterrupt() { 
+  Radial6 = EncoderInterupt(Radial6.State, Ring6RadialEncoderChannelA, Ring6RadialEncoderChannelB, Radial6.Counter);
 }
 
-Encoder Ring2AxialEncoderAInterrupt() {
-  Axial2 = EncoderInterupt(Axial2.State, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Axial2.Counter);
-  return Axial2;
+void Ring6AxialEncoderAInterrupt() {
+  Axial6 = EncoderInterupt(Axial6.State, Ring6AxialEncoderChannelA, Ring6AxialEncoderChannelB, Axial6.Counter);
 }
 
-Encoder Ring2AxialEncoderBInterrupt() {
-  Axial1 = EncoderInterupt(Axial2.State, Ring2AxialEncoderChannelA, Ring2AxialEncoderChannelB, Axial2.Counter);
-  return Axial2;
+void Ring6AxialEncoderBInterrupt() {
+  Axial6 = EncoderInterupt(Axial6.State, Ring6AxialEncoderChannelA, Ring6AxialEncoderChannelB, Axial6.Counter);
 }
 
 Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCounter) {
@@ -183,6 +182,7 @@ Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCoun
       EncoderCounter--;
     }
   }
+  Serial.write(EncoderCounter);
   Encoder Temp{EncoderCounter, State};
   return Temp;
 }
@@ -207,120 +207,121 @@ void StepperMotor (int StepCount, const int dirPin, const int stepPin ) {
 
 //The following is how far the motors need to move to get to their intended position
 void ExecuteSteps(){
-int desiredposition;
-int desiredposition2;
-int intendedposition;
-int intendedposition2;
-  int Choose;
+int AxialDesired5;
+int AxialDesired52;
+int RadialDesired5;
+int RadialDesired6;
     if (Serial.available() > 0) {
     // read the incoming byte:
-    desiredposition = Serial.read();
+    AxialDesired5 = Serial.read();
   }
       if (Serial.available() > 0) {
     // read the incoming byte:
-    desiredposition2 = Serial.read();
+    AxialDesired52 = Serial.read();
   }
       if (Serial.available() > 0) {
     // read the incoming byte:
-    intendedposition = Serial.read();
+    RadialDesired5 = Serial.read();
   }
       if (Serial.available() > 0) {
     // read the incoming byte:
-    intendedposition2 = Serial.read();
+    RadialDesired6 = Serial.read();
   }
 
   int x = 0;
 while(x==0){
   int Direction;
-if (abs(desiredposition - Axial1.Counter) > 2){
-  if (desiredposition - Axial1.Counter > 0){
+if (abs(AxialDesired5 - Axial5.Counter) > 2){
+  if (AxialDesired5 - Axial5.Counter > 0){
     Direction = 1;
   }
   else{
     Direction = -1;
   }
-  StepperMotor(Direction, Ring1AxialDir, Ring1AxialSteps);
+  StepperMotor(Direction, Ring5AxialDir, Ring5AxialSteps);
 }
 
-if (abs(desiredposition - Axial2.Counter) > 2){
-  if (desiredposition2 - Axial2.Counter > 0){
+if (abs(AxialDesired52 - Axial6.Counter) > 2){
+  if (AxialDesired52 - Axial6.Counter > 0){
     Direction = 1;
   }
   else{
     Direction = -1;
   }
-  StepperMotor(Direction, Ring2AxialDir, Ring2AxialSteps); //Motor will move
+  StepperMotor(Direction, Ring6AxialDir, Ring6AxialSteps); //Motor will move
 }
 
-if (abs(intendedposition - Radial1.Counter) > 2){
-  if (intendedposition - Radial1.Counter > 0){
+if (abs(RadialDesired5 - Radial5.Counter) > 2){
+  if (RadialDesired5 - Radial5.Counter > 0){
     Direction = 10;
   }
   else{
     Direction = -10;
   }
-StepperMotor(Direction, Ring1RadialDir, Ring1RadialSteps); //Motor Will move  
+StepperMotor(Direction, Ring5RadialDir, Ring5RadialSteps); //Motor Will move  
 }
 
-if (abs(intendedposition - Radial2.Counter) > 2){
-  if (intendedposition - Radial2.Counter > 0){
+if (abs(RadialDesired6 - Radial6.Counter) > 2){
+  if (RadialDesired6 - Radial6.Counter > 0){
     Direction = 10;
   }
   else{
     Direction = -10;
   }
-  StepperMotor(Direction, Ring2RadialDir, Ring2RadialSteps); //Motor will move  
+  StepperMotor(Direction, Ring6RadialDir, Ring6RadialSteps); //Motor will move  
 }
 //if all encoders are within 2 steps of the desired position, end
-//if (abs(desiredposition - Axial1.Counter) <= 2 && abs(desiredposition - Axial2.Counter) <= 2
-//&& abs(desiredposition - Radial1.Counter) <= 2 && abs(desiredposition - Radial2.Counter) <= 2){
+//if (abs(AxialDesired5 - Axial5.Counter) <= 2 && abs(AxialDesired5 - Axial6.Counter) <= 2
+//&& abs(AxialDesired5 - Radial5.Counter) <= 2 && abs(AxialDesired5 - Radial6.Counter) <= 2){
 //  x=1;
-//    Serial.print(Radial1.Counter);
-//    Serial.print(Axial1.Counter);
-//    Serial.print(Radial2.Counter);
-//    Serial.print(Axial2.Counter);
+//    Serial.print(Radial5.Counter);
+//    Serial.print(Axial5.Counter);
+//    Serial.print(Radial6.Counter);
+//    Serial.print(Axial6.Counter);
 //}
 }
 }
 
 //StartUp function, this zeros the array and encoders
 void StartUp (){
-  while( Radial1.Counter && Axial1.Counter && Radial1.Counter && Axial1.Counter != 0){
+  while( Radial5.Counter && Axial5.Counter && Radial5.Counter && Axial5.Counter != 0){
     
-  int PrevRadial1Counter = Radial1.Counter;
-  if (Radial1.Counter != 0){
-  StepperMotor (-2, Ring1RadialDir, Ring1RadialSteps );
-  if (PrevRadial1Counter-Radial1.Counter >=1){
-    Radial1.Counter=0;
+  int PrevRadial5Counter = Radial5.Counter;
+  if (Radial5.Counter != 0){
+  StepperMotor (-2, Ring5RadialDir, Ring5RadialSteps );
+  if (PrevRadial5Counter-Radial5.Counter >=1){
+    Radial5.Counter=0;
   }
 }
 
-  int PrevAxial1Counter = Axial1.Counter;
-  if (Axial1.Counter != 0){
-  StepperMotor (-2, Ring1RadialDir, Ring1RadialSteps );
-  if (PrevAxial1Counter-Axial1.Counter >=1){
-    Axial1.Counter=0;
+  int PrevAxial5Counter = Axial5.Counter;
+  if (Axial5.Counter != 0){
+  StepperMotor (-2, Ring5RadialDir, Ring5RadialSteps );
+  if (PrevAxial5Counter-Axial5.Counter >=1){
+    Axial5.Counter=0;
   }
 }
 
-  int PrevRadial2Counter = Radial2.Counter;
-  if (Radial2.Counter != 0){
-  StepperMotor (-2, Ring2RadialDir, Ring2RadialSteps );
-  if (PrevRadial2Counter-Radial2.Counter >=1){
-    Radial2.Counter=0;
+  int PrevRadial6Counter = Radial6.Counter;
+  if (Radial6.Counter != 0){
+  StepperMotor (-2, Ring6RadialDir, Ring6RadialSteps );
+  if (PrevRadial6Counter-Radial6.Counter >=1){
+    Radial6.Counter=0;
   }
 }
 
-  int PrevAxial2Counter = Axial2.Counter;
-  if (Axial2.Counter != 0){
-  StepperMotor (-2, Ring2RadialDir, Ring2RadialSteps );
-  if (PrevAxial2Counter-Axial2.Counter >=1){
-    Axial2.Counter=0;
+  int PrevAxial6Counter = Axial6.Counter;
+  if (Axial6.Counter != 0){
+  StepperMotor (-2, Ring6RadialDir, Ring6RadialSteps );
+  if (PrevAxial6Counter-Axial6.Counter >=1){
+    Axial6.Counter=0;
   }
 }
   }
 }
 
 void loop() {
-ExecuteSteps();
+//ExecuteSteps();
+//  Serial.println("EncoderCounter");
+StepperMotor (10, Ring5RadialDir, Ring5RadialSteps );
 }
