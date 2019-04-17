@@ -148,34 +148,34 @@ Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCoun
   //Finds encoder direction using encoder states
   if (Previous == 'A') {
     if (State == 'B') {
-      EncoderCounter++;
+      EncoderCounter--;
     }
     else if (State == 'D') {
-      EncoderCounter--;
+      EncoderCounter++;
     }
   }
   else if (Previous == 'B') {
     if (State == 'C') {
-      EncoderCounter++;
+      EncoderCounter--;
     }
     else if (State == 'A') {
-      EncoderCounter--;
+      EncoderCounter++;
     }
   }
   else if (Previous == 'C') {
     if (State == 'D') {
-      EncoderCounter++;
+      EncoderCounter--;
     }
     else if (State == 'B') {
-      EncoderCounter--;
+      EncoderCounter++;
     }
   }
   else if (Previous == 'D') {
     if (State == 'A') {
-     EncoderCounter++;
+     EncoderCounter--;
     }
     else if (State == 'C') {
-      EncoderCounter--;
+      EncoderCounter++;
     }
   }
   Serial.println(EncoderCounter);
