@@ -1,10 +1,10 @@
 //This code is written for the Arduino DUE
 //The purpose of this code is to take a user defined polar coordinate or preset and reconfigure an array to match those coordinates
 /*Notable functions:
-StepperMotor (int StepCount, const int dirPin, const int stepPin )
+StepperMotor (int StepCount, const int dirPin, const int stepPin, const int sleepPin )
 see Pinout chart for pins
 */
-int DELAY=10; //delay between steps in miliseconds
+int DELAY=2; //delay between steps in miliseconds
 
 /*Code Structure:
 -Variables
@@ -42,6 +42,7 @@ const int Ring5RadialDir = 53;
 const int Ring5RadialSleep = 51;
 const int Ring5RadialEncoderChannelA = 49;
 const int Ring5RadialEncoderChannelB = 50;
+const int Ring5RadialEncoderIndex = 1;
 const int Ring5AxialSteps = 42; //Ring 5 Axial
 const int Ring5AxialDir = 43;
 const int Ring5AxialSleep = 41;
@@ -52,28 +53,36 @@ const int Ring6RadialDir = 11;
 const int Ring6RadialSleep = 13;
 const int Ring6RadialEncoderChannelA = 9;
 const int Ring6RadialEncoderChannelB = 10;
+const int Ring6RadialEncoderIndex = 1;
 const int Ring6AxialSteps = 3; //Ring 6 Axial
 const int Ring6AxialDir = 2;
 const int Ring6AxialSleep = 4;
 const int Ring6AxialEncoderChannelA = 5;
 const int Ring6AxialEncoderChannelB = 6;
+int Direction;
 
 void setup() {
   //configure pins to input or output
   pinMode(Ring5RadialSteps, OUTPUT);
   pinMode(Ring5RadialDir, OUTPUT);
+  pinMode(Ring5RadialSleep, OUTPUT);
   pinMode(Ring5AxialSteps, OUTPUT);
   pinMode(Ring5AxialDir, OUTPUT);
+  pinMode(Ring5AxialSleep, OUTPUT);
   pinMode(Ring5RadialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring5RadialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring5RadialEncoderIndex, INPUT);
   pinMode(Ring5AxialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring5AxialEncoderChannelB, INPUT_PULLUP);
   pinMode(Ring6RadialSteps, OUTPUT);
   pinMode(Ring6RadialDir, OUTPUT);
+  pinMode(Ring6RadialSleep, OUTPUT);
   pinMode(Ring6AxialSteps, OUTPUT);
   pinMode(Ring6AxialDir, OUTPUT);
+  pinMode(Ring6AxialSleep, OUTPUT);
   pinMode(Ring6RadialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring6RadialEncoderChannelB, INPUT_PULLUP);
+  pinMode(Ring6RadialEncoderIndex, INPUT);
   pinMode(Ring6AxialEncoderChannelA, INPUT_PULLUP);
   pinMode(Ring6AxialEncoderChannelB, INPUT_PULLUP);
   
@@ -92,6 +101,11 @@ void setup() {
 
 //Launch Startup Sequence
   //StartUp();
+  
+  digitalWrite(Ring5RadialSleep, LOW);
+  digitalWrite(Ring5AxialSleep, LOW);
+  digitalWrite(Ring6RadialSleep, LOW);
+  digitalWrite(Ring6AxialSleep, LOW);
 }
 
 //Encoder interupts
@@ -184,7 +198,8 @@ Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCoun
 }
 
 //This function runs the motor
-void StepperMotor (int StepCount, const int dirPin, const int stepPin ) {
+void StepperMotor (int StepCount, const int dirPin, const int stepPin, const int sleepPin ) {
+  digitalWrite(sleepPin, HIGH); //Wake up motor
   if (StepCount > 0) {
     digitalWrite(dirPin,HIGH); // Enables the motor to move in a particular direction
       }
@@ -199,6 +214,7 @@ void StepperMotor (int StepCount, const int dirPin, const int stepPin ) {
         digitalWrite(stepPin,LOW);
         delay(DELAY);
     }
+  digitalWrite(sleepPin, LOW); //Put motor to sleep
 }
 
 //The following is how far the motors need to move to get to their intended position
@@ -234,7 +250,7 @@ if (abs(AxialDesired5 - Axial5.Counter) > 2){
   else{
     Direction = -1;
   }
-  StepperMotor(Direction, Ring5AxialDir, Ring5AxialSteps);
+  StepperMotor(Direction, Ring5AxialDir, Ring5AxialSteps, Ring5AxialSleep);
 }
 
 if (abs(AxialDesired52 - Axial6.Counter) > 2){
@@ -244,7 +260,7 @@ if (abs(AxialDesired52 - Axial6.Counter) > 2){
   else{
     Direction = -1;
   }
-  StepperMotor(Direction, Ring6AxialDir, Ring6AxialSteps); //Motor will move
+  StepperMotor(Direction, Ring6AxialDir, Ring6AxialSteps, Ring6AxialSteps); //Motor will move
 }
 
 if (abs(RadialDesired5 - Radial5.Counter) > 2){
@@ -254,7 +270,7 @@ if (abs(RadialDesired5 - Radial5.Counter) > 2){
   else{
     Direction = -10;
   }
-StepperMotor(Direction, Ring5RadialDir, Ring5RadialSteps); //Motor Will move  
+StepperMotor(Direction, Ring5RadialDir, Ring5RadialSteps, Ring5RadialSleep); //Motor Will move  
 }
 
 if (abs(RadialDesired6 - Radial6.Counter) > 2){
@@ -264,7 +280,7 @@ if (abs(RadialDesired6 - Radial6.Counter) > 2){
   else{
     Direction = -10;
   }
-  StepperMotor(Direction, Ring6RadialDir, Ring6RadialSteps); //Motor will move  
+  StepperMotor(Direction, Ring6RadialDir, Ring6RadialSteps, Ring6RadialSleep); //Motor will move  
 }
 //if all encoders are within 2 steps of the desired position, end
 //if (abs(AxialDesired5 - Axial5.Counter) <= 2 && abs(AxialDesired5 - Axial6.Counter) <= 2
@@ -281,43 +297,63 @@ if (abs(RadialDesired6 - Radial6.Counter) > 2){
 //StartUp function, this zeros the array and encoders
 void StartUp (){
   while( Radial5.Counter && Axial5.Counter && Radial5.Counter && Axial5.Counter != 0){
-    
-  int PrevRadial5Counter = Radial5.Counter;
-  if (Radial5.Counter != 0){
-  StepperMotor (-2, Ring5RadialDir, Ring5RadialSteps );
-  if (PrevRadial5Counter-Radial5.Counter >=1){
+  
+  int Count5 = 1;
+  for(int x = 0; x < abs(Count5); x++){
+    int Index5 = digitalRead(Ring5RadialEncoderIndex);
+  if (Index5 == HIGH){
     Radial5.Counter=0;
   }
+  else{
+      if (Count5 > 0){
+    Direction = 1;
+  }
+  else{
+    Direction = -1;
+  }
+  StepperMotor (Direction, Ring5RadialDir, Ring5RadialSteps, Ring5RadialSleep );
+  Count5=Count5*(-2);
+  }
 }
+  }
 
   int PrevAxial5Counter = Axial5.Counter;
   if (Axial5.Counter != 0){
-  StepperMotor (-2, Ring5RadialDir, Ring5RadialSteps );
+  StepperMotor (-2, Ring5AxialDir, Ring5AxialSteps, Ring5AxialSleep );
   if (PrevAxial5Counter-Axial5.Counter >=1){
     Axial5.Counter=0;
   }
 }
 
-  int PrevRadial6Counter = Radial6.Counter;
-  if (Radial6.Counter != 0){
-  StepperMotor (-2, Ring6RadialDir, Ring6RadialSteps );
-  if (PrevRadial6Counter-Radial6.Counter >=1){
+  int Count6 = 1;
+  for(int x = 0; x < abs(Count6); x++){
+    int Index6 = digitalRead(Ring5RadialEncoderIndex);
+  if (Index6 == HIGH){
     Radial6.Counter=0;
+  }
+  else{
+      if (Count6 > 0){
+    Direction = 1;
+  }
+  else{
+    Direction = -1;
+  }
+  StepperMotor (Direction, Ring6RadialDir, Ring6RadialSteps, Ring6RadialSleep );
+  Count6=Count6*(-2);
   }
 }
 
   int PrevAxial6Counter = Axial6.Counter;
   if (Axial6.Counter != 0){
-  StepperMotor (-2, Ring6RadialDir, Ring6RadialSteps );
+  StepperMotor (-2, Ring6AxialDir, Ring6AxialSteps, Ring6AxialSleep );
   if (PrevAxial6Counter-Axial6.Counter >=1){
     Axial6.Counter=0;
   }
 }
   }
-}
 
 void loop() {
 //ExecuteSteps();
 //  Serial.println("EncoderCounter");
-StepperMotor (10, Ring5RadialDir, Ring5RadialSteps );
+StepperMotor (10, Ring6AxialDir, Ring6AxialSteps, Ring6AxialSleep );
 }
