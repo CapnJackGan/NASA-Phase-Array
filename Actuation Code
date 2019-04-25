@@ -4,7 +4,8 @@
 StepperMotor (int StepCount, const int dirPin, const int stepPin )
 see Pinout chart for pins
 */
-int DELAY=20; //delay between steps in miliseconds
+int DELAY=2; //delay between steps in miliseconds for radial expansion
+//int DELAY=20; //delay between steps in miliseconds for axial rotation
 
 /*Code Structure:
 -Variables
@@ -93,8 +94,8 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(Ring6RadialEncoderChannelB), Ring6RadialEncoderBInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderChannelA), Ring6AxialEncoderAInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderChannelB), Ring6AxialEncoderBInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring5AxialEncoderIndex), Home5, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderIndex), Hello, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring5AxialEncoderIndex), Hello, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderIndex), Home6, CHANGE);
 
   //Iniatiate serial port
   Serial.begin(250000);
@@ -111,8 +112,12 @@ void Home5(){
   Homed5=1;
 }
 
+void Home6(){
+  Homed6=1;
+}
+
 void Hello(){
-  Serial.println("Hello");
+  Serial.println("Hello!!!!!!!!!!!");
 }
 void Ring5RadialEncoderAInterrupt() {
   Radial5 = EncoderInterupt(Radial5.State, Ring5RadialEncoderChannelA, Ring5RadialEncoderChannelB, Radial5.Counter);
@@ -167,37 +172,37 @@ Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCoun
   //Finds encoder direction using encoder states
   if (Previous == 'A') {
     if (State == 'B') {
-      EncoderCounter++;
+      EncoderCounter--;
     }
     else if (State == 'D') {
-      EncoderCounter--;
+      EncoderCounter++;
     }
   }
   else if (Previous == 'B') {
     if (State == 'C') {
-      EncoderCounter++;
+      EncoderCounter--;
     }
     else if (State == 'A') {
-      EncoderCounter--;
+      EncoderCounter++;
     }
   }
   else if (Previous == 'C') {
     if (State == 'D') {
-      EncoderCounter++;
+      EncoderCounter--;
     }
     else if (State == 'B') {
-      EncoderCounter--;
+      EncoderCounter++;
     }
   }
   else if (Previous == 'D') {
     if (State == 'A') {
-     EncoderCounter++;
+     EncoderCounter--;
     }
     else if (State == 'C') {
-      EncoderCounter--;
+      EncoderCounter++;
     }
   }
-  //Serial.println(EncoderCounter);
+  Serial.println(EncoderCounter);
   Encoder Temp{EncoderCounter, State};
   return Temp;
 }
@@ -323,5 +328,21 @@ void StartUp (){
 void loop() {
 //ExecuteSteps();
 //  Serial.println("EncoderCounter");
-  StepperMotor (10, Ring6AxialDir, Ring6AxialSteps );
+
+//  StepperMotor (-10, Ring6RadialDir, Ring6RadialSteps );
+
+//  int PrevRadial6Counter = Radial6.Counter;
+//  int Stop = 0;
+//  if (Stop = 0){
+//  StepperMotor (-10, Ring6RadialDir, Ring6RadialSteps );
+//  if (PrevRadial6Counter-Radial6.Counter == 0){
+//    Radial6.Counter=0;
+//    Stop = 1;
+//    Serial.println("Stopped");
+//  }
+//}
+
+//if (Homed6 == 0){
+//  StepperMotor (-10, Ring6AxialDir, Ring6AxialSteps );
+//}
 }
