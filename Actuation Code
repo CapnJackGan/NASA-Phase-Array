@@ -358,8 +358,12 @@ void loop() {
     String Move = Serial.readString(); //reads user input from matlab
     int Ring = Move.substring(1,2).toInt();
     String Dir = Move.substring(3,4);
-    int Distance = Move.substring(5,11).toInt();
+    int Negative = Move.substring(4,5).toInt();
+    int Distance = Move.substring(6,12).toInt();
     int Steps;
+    if (Negative == 0){
+      Distance = Distance*-1;
+    }
     if (Ring == 5 && Dir == "a"){
       Steps = Distance/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
       ExecuteSteps("Axial5", Steps);
@@ -383,21 +387,38 @@ void loop() {
     case 'a'://Automatic control/presets
     if (Serial.available() > 0) {
     String Move = Serial.readString();
-    int DistanceAx = Move.substring(5,11).toInt();
-    int DistanceRad = Move.substring(14,20).toInt();
-      Steps = DistanceAx/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
+    int NegativeAx = Move.substring(4,5).toInt();
+    int DistanceAx = Move.substring(6,12).toInt();
+    int NegativeRad = Move.substring(14,15).toInt();
+    int DistanceRad = Move.substring(16,22).toInt();
+    int Steps = DistanceAx/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
+    if (NegativeAx == 0){
+      Steps = Steps*-1;
+    }
       ExecuteSteps("Axial5", Steps);
       Steps = DistanceRad*20*1600/10000; //1600 steps per rev, 20 rev per Inch, input in Inches*10^-4
+    if (NegativeRad == 0){
+      Steps = Steps*-1;
+    }
       ExecuteSteps("Radial5", Steps);
     }
     Serial.println("done");
+    
     if (Serial.available() > 0) {
     String Move = Serial.readString();
-    int DistanceAx = Move.substring(5,11).toInt();
-    int DistanceRad = Move.substring(14,20).toInt();
-      Steps = DistanceAx/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
+    int NegativeAx = Move.substring(4,5).toInt();
+    int DistanceAx = Move.substring(6,12).toInt();
+    int NegativeRad = Move.substring(14,15).toInt();
+    int DistanceRad = Move.substring(16,22).toInt();
+    int Steps = DistanceAx/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
+    if (NegativeAx == 0){
+      Steps = Steps*-1;
+    }
       ExecuteSteps("Axial6", Steps);
       Steps = DistanceRad*20*1600/10000; //1600 steps per rev, 20 rev per Inch, input in Inches*10^-4
+    if (NegativeRad == 0){
+      Steps = Steps*-1;
+    }
       ExecuteSteps("Radial6", Steps);
     }
     Serial.println("done");
