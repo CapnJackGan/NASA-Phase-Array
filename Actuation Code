@@ -4,8 +4,6 @@
 StepperMotor (int StepCount, const int dirPin, const int stepPin )
 see Pinout chart for pins
 */
-int DELAY=2; //delay between steps in miliseconds for radial expansion
-//int DELAY=20; //delay between steps in miliseconds for axial rotation
 
 /*Code Structure:
 -Variables
@@ -209,6 +207,13 @@ Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCoun
 
 //This function runs the motor
 void StepperMotor (int StepCount, const int dirPin, const int stepPin ) {
+int DELAY;
+if (dirPin ==  Ring5RadialDir||Ring6RadialDir){
+DELAY=2; //delay between steps in miliseconds for radial expansion
+}
+if (dirPin ==  Ring5AxialDir||Ring6AxialDir){
+DELAY=20; //delay between steps in miliseconds for axial rotation
+}
   if (StepCount > 0) {
     digitalWrite(dirPin,LOW); // Enables the motor to move in a particular direction
       }
@@ -344,6 +349,7 @@ void loop() {
     int Ring = Homing.substring(1,2).toInt();
     String Dir = Homing.substring(3,4);
     StartUp (Ring, Dir);
+    Serial.println("done");
   }
     break;
 
@@ -370,6 +376,7 @@ void loop() {
       Steps = Distance*20*1600/10000; //1600 steps per rev, 20 rev per Inch, input in Inches*10^-4
       ExecuteSteps("Radial6", Steps);
     }
+    Serial.println("done");
     }
     break;
 
