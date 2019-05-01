@@ -30,10 +30,10 @@ struct Encoder {
 };
 
 //Variable encoder states
-Encoder Radial5 = {100000, 'A'};
-Encoder Radial6 = {100000, 'A'};
-Encoder Axial5 = {100000, 'A'};
-Encoder Axial6 = {100000, 'A'};
+Encoder Radial5 = {0, 'A'};
+Encoder Radial6 = {0, 'A'};
+Encoder Axial5 = {0, 'A'};
+Encoder Axial6 = {0, 'A'};
 
 //Set Pins, see pinout chart
 const int Ring5RadialSteps = 52; //Ring 5 Radial
@@ -92,14 +92,16 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(Ring6RadialEncoderChannelB), Ring6RadialEncoderBInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderChannelA), Ring6AxialEncoderAInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderChannelB), Ring6AxialEncoderBInterrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring5AxialEncoderIndex), Home5, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderIndex), Home6, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring5AxialEncoderIndex), Hello, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Ring6AxialEncoderIndex), Hello, CHANGE);
 
   //Iniatiate serial port
   Serial.begin(250000);
 
 //Launch Startup Sequence
-  //StartUp();
+  //StartUp(5,"r");
+  StepperMotor (-4000, Ring6RadialDir, Ring6RadialSteps );
+  //ExecuteSteps("Radial6", 3200);
 }
 
 //Encoder interupts
@@ -115,7 +117,7 @@ void Home6(){
 }
 
 void Hello(){
-  Serial.println("Hello!!!!!!!!!!!");
+  //Serial.println("Hello!!!!!!!!!!!");
 }
 void Ring5RadialEncoderAInterrupt() {
   Radial5 = EncoderInterupt(Radial5.State, Ring5RadialEncoderChannelA, Ring5RadialEncoderChannelB, Radial5.Counter);
@@ -208,10 +210,10 @@ Encoder EncoderInterupt(char State, int ChannelA, int ChannelB, long EncoderCoun
 //This function runs the motor
 void StepperMotor (int StepCount, const int dirPin, const int stepPin ) {
 int DELAY;
-if (dirPin ==  Ring5RadialDir||Ring6RadialDir){
+if (dirPin ==  Ring5RadialDir||dirPin == Ring6RadialDir){
 DELAY=2; //delay between steps in miliseconds for radial expansion
 }
-if (dirPin ==  Ring5AxialDir||Ring6AxialDir){
+if (dirPin ==  Ring5AxialDir||dirPin == Ring6AxialDir){
 DELAY=20; //delay between steps in miliseconds for axial rotation
 }
   if (StepCount > 0) {
@@ -255,10 +257,9 @@ void ExecuteSteps(String Selection, int Desired){
     Dir = Ring6RadialDir;
     Steps = Ring6RadialSteps;
   }
-  int x = 0;
-while(x==0){
+  
+while (abs(Desired - Counter) > 3){
   int Direction;
-if (abs(Desired - Counter) > 2){
   if (Desired - Counter > 0){
     Direction = 1;
   }
@@ -267,49 +268,50 @@ if (abs(Desired - Counter) > 2){
   }
   StepperMotor(Direction, Dir, Steps);
 }
-
-//if encoder is within 2 steps of the desired position, end
-if (abs(Desired - Counter) <= 2){
-  x=1;
-    //Serial.print(Counter);
-}
-}
 }
 
 //StartUp function, this zeros the array and encoders
 void StartUp (int Ring, String Dir){
   int Homed = 0;
-  while( Homed != 1){
     if (Dir == "a"){
       if (Ring == 5){
-  StepperMotor (-800, Ring5AxialDir, Ring5AxialSteps );
+        Serial.print("Started");
+  StepperMotor (-200, Ring5AxialDir, Ring5AxialSteps);
   Homed5=0;
+  while( Homed != 1){
+    Serial.print("In while");
   if (Homed5 == 0){
-  StepperMotor (-1, Ring5AxialDir, Ring5AxialSteps );
+    Serial.print("In if");
+  StepperMotor (1, Ring5AxialDir, Ring5AxialSteps );
 }
 else if (Homed5 == 1){
+  //StepperMotor (x, Ring5AxialDir, Ring5AxialSteps ); //edit x so that home is vertical
   Axial5.Counter=0;
     Homed = 1;
 }
       }
+      }
       if (Ring == 6) {
-  StepperMotor (-800, Ring6AxialDir, Ring6AxialSteps );
+  StepperMotor (-200, Ring6AxialDir, Ring6AxialSteps );
   Homed6=0; 
+  while( Homed != 1){
 if (Homed6 == 0){
-  StepperMotor (-1, Ring6AxialDir, Ring6AxialSteps );
+  StepperMotor (1, Ring6AxialDir, Ring6AxialSteps );
 }
 else if (Homed6 == 1){
+  //StepperMotor (x, Ring5AxialDir, Ring5AxialSteps ); //edit x so that home is vertical
   Axial6.Counter=0;
     Homed = 1;
 } 
+  }
     }
     }
 
     if (Dir == "r"){
       if (Ring == 5){
+  while (Radial5.Counter != 0){
   int PrevRadial5Counter = Radial5.Counter;
-  if (Radial5.Counter != 0){
-  StepperMotor (-1, Ring5RadialDir, Ring5RadialSteps );
+  StepperMotor (-4, Ring5RadialDir, Ring5RadialSteps );
   if (PrevRadial5Counter-Radial5.Counter == 0){
     Radial5.Counter=0;
     Homed = 1;
@@ -317,9 +319,9 @@ else if (Homed6 == 1){
 }
       }
       if (Ring == 6){
+  while (Radial6.Counter != 0){
   int PrevRadial6Counter = Radial6.Counter;
-  if (Radial6.Counter != 0){
-  StepperMotor (-1, Ring6RadialDir, Ring6RadialSteps );
+  StepperMotor (-4, Ring6RadialDir, Ring6RadialSteps );
   if (PrevRadial6Counter-Radial6.Counter == 0){
     Radial6.Counter=0;
     Homed = 1;
@@ -327,49 +329,52 @@ else if (Homed6 == 1){
 }
       }
     }
-
-
-  }
 }
 
 void loop() {
+//  StepperMotor (1, Ring5RadialDir, Ring5RadialSteps );
+  
   char MATLAB;
-      if (Serial.available() > 0) {
+  if (Serial.available() > 0) {
     MATLAB = Serial.read(); //reads user input from matlab
-  }
+  
   
   switch (MATLAB){
     case 'c'://codeRequest, handshake protocol
-    Serial.println("NASA_Phased_Array_ArdCode_V2.012.3");
+    Serial.println("ArdCode_c71aba6");
     break;
     
-    case 'h'://Homing protocol
-    if (Serial.available() > 0) {
-    String Homing = Serial.readString(); //reads user input from matlab
-    int Ring = Homing.substring(1,2).toInt();
-    String Dir = Homing.substring(3,4);
-    StartUp (Ring, Dir);
-    Serial.println("done");
+    case 'h': //Homing protocol
+//    if (Serial.available() > 0) {
+{
+      delay(1000);
+      String Homing = Serial.readString(); //reads user input from matlab
+      int Ring = Homing.substring(1,2).toInt();
+      String Dir = Homing.substring(3,4);
+      StartUp(Ring, Dir);
+      Serial.println("done");
+//    }
   }
     break;
 
     case 'm'://Manual control
-    if (Serial.available() > 0) {
+    {
+      delay(1000);
     String Move = Serial.readString(); //reads user input from matlab
     int Ring = Move.substring(1,2).toInt();
     String Dir = Move.substring(3,4);
     int Negative = Move.substring(4,5).toInt();
     int Distance = Move.substring(6,12).toInt();
     int Steps;
-    if (Negative == 0){
-      Distance = Distance*-1;
-    }
+//    if (Negative == 0){
+//      Distance = Distance*-1;
+//    }
     if (Ring == 5 && Dir == "a"){
-      Steps = Distance/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
+      Steps = Distance/.225/10000;//.225 degrees per encoder step, input in degrees*10^-4
       ExecuteSteps("Axial5", Steps);
     }
     else if (Ring == 6 && Dir == "a"){
-      Steps = Distance/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
+      Steps = Distance/.225/10000;//.225 degrees per encoder step, input in degrees*10^-4
       ExecuteSteps("Axial6", Steps);
     }
     else if (Ring == 5 && Dir == "r"){
@@ -385,13 +390,34 @@ void loop() {
     break;
 
     case 'a'://Automatic control/presets
-    if (Serial.available() > 0) {
+    {
+      delay(1000);
     String Move = Serial.readString();
     int NegativeAx = Move.substring(4,5).toInt();
     int DistanceAx = Move.substring(6,12).toInt();
     int NegativeRad = Move.substring(14,15).toInt();
     int DistanceRad = Move.substring(16,22).toInt();
-    int Steps = DistanceAx/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
+    int Steps = DistanceAx/.225/10000;//.225 degrees per encoder step, input in degrees*10^-4
+//    if (NegativeAx == 0){
+//      Steps = Steps*-1;
+//    }
+      ExecuteSteps("Axial6", Steps);
+      Steps = DistanceRad*20*1600/10000; //1600 steps per rev, 20 rev per Inch, input in Inches*10^-4
+//    if (NegativeRad == 0){
+//      Steps = Steps*-1;
+//    }
+      ExecuteSteps("Radial6", Steps);
+    }
+    Serial.println("done");
+    
+    {
+      delay(1000);
+    String Move = Serial.readString();
+    int NegativeAx = Move.substring(4,5).toInt();
+    int DistanceAx = Move.substring(6,12).toInt();
+    int NegativeRad = Move.substring(14,15).toInt();
+    int DistanceRad = Move.substring(16,22).toInt();
+    int Steps = DistanceAx/.225/10000;//.225 degrees per encoder step, input in degrees*10^-4
     if (NegativeAx == 0){
       Steps = Steps*-1;
     }
@@ -401,30 +427,13 @@ void loop() {
       Steps = Steps*-1;
     }
       ExecuteSteps("Radial5", Steps);
-    }
-    Serial.println("done");
     
-    if (Serial.available() > 0) {
-    String Move = Serial.readString();
-    int NegativeAx = Move.substring(4,5).toInt();
-    int DistanceAx = Move.substring(6,12).toInt();
-    int NegativeRad = Move.substring(14,15).toInt();
-    int DistanceRad = Move.substring(16,22).toInt();
-    int Steps = DistanceAx/.75/10000;//.75 degrees per encoder step, input in degrees*10^-4
-    if (NegativeAx == 0){
-      Steps = Steps*-1;
-    }
-      ExecuteSteps("Axial6", Steps);
-      Steps = DistanceRad*20*1600/10000; //1600 steps per rev, 20 rev per Inch, input in Inches*10^-4
-    if (NegativeRad == 0){
-      Steps = Steps*-1;
-    }
-      ExecuteSteps("Radial6", Steps);
-    }
     Serial.println("done");
+    }
     break;
 
     case 'p'://Position query
+    {
     long Output;
     Output = Radial5.Counter/20/1600; //20 pitch, 1600 steps per revolution
     Serial.println(Output);
@@ -437,5 +446,8 @@ void loop() {
     
     Output = Axial6.Counter*360/3/1600; //3:1 gear ratio, 1600 steps per revolution
     Serial.println(Output);
+    }
+    break;
+  }
   }
 }
