@@ -408,48 +408,63 @@ void loop() {
     
     
 
-//    case 'a'://Automatic control/presets
-//    {
-//      delay(1000);
-//    String Move = Serial.readString();
-//    int NegativeAx = Move.substring(4,5).toInt();
-//    int DistanceAx = Move.substring(6,12).toInt();
-//    int NegativeRad = Move.substring(14,15).toInt();
-//    int DistanceRad = Move.substring(16,22).toInt();
-//    int Steps = DistanceAx/.225/10000;//.225 degrees per encoder step, input in degrees*10^-4
-////    if (NegativeAx == 0){
-////      Steps = Steps*-1;
-////    }
-//      ExecuteSteps("Axial6", Steps);
-//      Steps = DistanceRad*20*1600/10000; //1600 steps per rev, 20 rev per Inch, input in Inches*10^-4
-////    if (NegativeRad == 0){
-////      Steps = Steps*-1;
-////    }
-//      ExecuteSteps("Radial6", Steps);
-//    }
-//    Serial.println("done");
-//    
-//    {
-//      delay(1000);
-//    String Move = Serial.readString();
-//    int NegativeAx = Move.substring(4,5).toInt();
-//    int DistanceAx = Move.substring(6,12).toInt();
-//    int NegativeRad = Move.substring(14,15).toInt();
-//    int DistanceRad = Move.substring(16,22).toInt();
-//    int Steps = DistanceAx/.225/10000;//.225 degrees per encoder step, input in degrees*10^-4
-//    if (NegativeAx == 0){
-//      Steps = Steps*-1;
-//    }
-//      ExecuteSteps("Axial5", Steps);
-//      Steps = DistanceRad*20*1600/10000; //1600 steps per rev, 20 rev per Inch, input in Inches*10^-4
-//    if (NegativeRad == 0){
-//      Steps = Steps*-1;
-//    }
-//      ExecuteSteps("Radial5", Steps);
-//    
-//    Serial.println("done");
-//    }
-//    break;
+    case 'a'://Automatic control/presets
+    {
+      delay(1000);
+    String Move = Serial.readString();
+    int NegativeAx = Move.substring(4,5).toInt();
+    int DistanceAx = Move.substring(6,12).toInt();
+    int NegativeRad = Move.substring(14,15).toInt();
+    int DistanceRad = Move.substring(16,22).toInt();
+    int Desired;
+    int Current;
+    int Steps;
+    if (NegativeAx == 0){
+      Steps = Steps*-1;
+    }
+      Desired = (DistanceAx/10000)*3/0.9;
+      Current = Axial5.Counter*0.075;
+      Steps = Desired-Current;
+      StepperMotor (Steps, Ring5AxialDir, Ring5AxialSteps );
+      
+    if (NegativeRad == 0){
+      Steps = Steps*-1;
+    }
+      Desired = (DistanceRad/10000)*4000;
+      Current = Radial5.Counter/8;
+      Steps = Desired-Current;
+      StepperMotor (Steps, Ring5RadialDir, Ring5RadialSteps );
+    
+    
+    
+      delay(1000);
+    Move = Serial.readString();
+    NegativeAx = Move.substring(4,5).toInt();
+    DistanceAx = Move.substring(6,12).toInt();
+    NegativeRad = Move.substring(14,15).toInt();
+    DistanceRad = Move.substring(16,22).toInt();
+    Desired;
+    Current;
+    Steps;
+    if (NegativeAx == 0){
+      Steps = Steps*-1;
+    }
+      Desired = (DistanceAx/10000)*3/0.9;
+      Current = Axial5.Counter*0.075;
+      Steps = Desired-Current;
+      StepperMotor (Steps, Ring5AxialDir, Ring5AxialSteps );
+      
+    if (NegativeRad == 0){
+      Steps = Steps*-1;
+    }
+      Desired = (DistanceRad/10000)*4000;
+      Current = Radial5.Counter/8;
+      Steps = Desired-Current;
+      StepperMotor (Steps, Ring5RadialDir, Ring5RadialSteps );
+    }
+    
+    Serial.println("done");
+    break;
 
     case 'p'://Position query
     {
